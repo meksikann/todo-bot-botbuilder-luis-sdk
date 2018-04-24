@@ -1,0 +1,24 @@
+{
+  "name": "todo-bot-botbuilder-luis-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meksikann/todo-bot-botbuilder-luis-sdk.git"
+  },
+  "author": "meksikann@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/meksikann/todo-bot-botbuilder-luis-sdk/issues"
+  },
+  "homepage": "https://github.com/meksikann/todo-bot-botbuilder-luis-sdk#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "botbuilder": "^3.14.1",
+    "restify": "^7.1.1"
+  }
+}
