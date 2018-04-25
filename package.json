@@ -19,6 +19,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "botbuilder": "^3.14.1",
+    "mongoist": "^1.7.2",
     "restify": "^7.1.1"
   }
 }
