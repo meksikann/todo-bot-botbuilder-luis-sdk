@@ -1,6 +1,5 @@
 const restify = require('restify');
 const builder = require('botbuilder');
-let botMessaging = require('./helpers/send-message');
 
 let server = restify.createServer();
 
@@ -16,19 +15,27 @@ let connector = new builder.ChatConnector({
 });
 
 server.post('/api/messages', connector.listen());
+let inMemoryStorage = new builder.MemoryBotStorage();
 
-// Receive messages from the user and respond by echoing each message back (prefixed with 'You said:')
-let bot = new builder.UniversalBot(connector, function (session) {
-
-    //TODO: do messaging
-    if(session.message.text.toLowerCase() == 'hello'){
-        return botMessaging.sendMessage(session, 'hey there, how are you?');
+// start set tasks conversation
+let bot = new builder.UniversalBot(connector,[
+    function (session) {
+        session.send('Hi man, You do not have ay task scheduled. Lets add some.. :)');
+        session.beginDialog('askForTaskName');
     }
+]).set('storage', inMemoryStorage);
 
-    if(session.message.text.toLowerCase().includes('fuck')){
-        return botMessaging.sendMessage(session, "Don't say such bad stuff!!!!");
+
+//dialog to ask for a task name
+
+bot.dialog('askForTaskName',[
+    (session) => {
+        builder.Prompt.text(session, "What is TODO name");
+    },
+    (session, results) => {
+        session.endDialogWithResult(results);
+
     }
+]);
 
-    return botMessaging.sendMessage(session, 'sorry! I am not so clever yet.');
-});
 
