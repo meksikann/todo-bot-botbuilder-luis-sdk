@@ -1,0 +1,157 @@
+{
+  "luis_schema_version": "2.1.0",
+  "versionId": "0.2",
+  "name": "Todo-Agent 0.2",
+  "desc": "This LUIS app has a  AddTask, GetTasks, FinishTask, Greeting, and None intents.",
+  "culture": "en-us",
+  "intents": [
+    {
+      "name": "Greeting"
+    },
+    {
+      "name": "AddTask"
+    },
+    {
+      "name": "GetTasks"
+    },
+    {
+      "name": "FinishTask"
+    },
+    {
+      "name": "None"
+    }
+  ],
+  "entities": [
+    {
+      "name": "taskName"
+    }
+  ],
+  "composites": [],
+  "closedLists": [],
+  "bing_entities": [],
+  "actions": [],
+  "model_features": [],
+  "regex_features": [],
+  "utterances": [
+    {
+      "text": "hi",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "hey there",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "how are you?",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "hello",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "welcome",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "show me  my tasks",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "get tasks",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "list my tasks",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "task list",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "what is my tasks",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "what shell I do today",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "what is my work for today?",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "where do you live?",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "add task",
+      "intent": "AddTask",
+      "entities": []
+    },
+    {
+      "text": "create task",
+      "intent": "AddTask",
+      "entities": []
+    },
+    {
+      "text": "add one",
+      "intent": "AddTask",
+      "entities": []
+    },
+    {
+      "text": "make task",
+      "intent": "AddTask",
+      "entities": []
+    },
+    {
+      "text": "write item",
+      "intent": "AddTask",
+      "entities": []
+    },
+    {
+      "text": "create item",
+      "intent": "AddTask",
+      "entities": []
+    },
+    {
+      "text": "I am done",
+      "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "it's finished",
+      "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "remove task",
+      "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "finish the task",
+      "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "It is done",
+      "intent": "FinishTask",
+      "entities": []
+    }
+  ]
+}

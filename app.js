@@ -22,7 +22,7 @@ server.post('/api/messages', connector.listen());
 let inMemoryStorage = new builder.MemoryBotStorage();
 
 // start set tasks conversation
-let bot = new builder.UniversalBot(connector,[
+let bot = new builder.UniversalBot(connector,
     function (session) {
         session.send(
             'Hi man. <br/> ' +
@@ -31,7 +31,13 @@ let bot = new builder.UniversalBot(connector,[
             '"show tasks" to get you task list.<br/>' +
             'Have a nice journey!!!');
     }
-]).set('storage', inMemoryStorage);
+).set('storage', inMemoryStorage);
+
+//connect to LUIS
+let recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL);
+console.log('model url---------------------------------------------------->');
+console.log(process.env.LUIS_MODEL_URL);
+bot.recognizer(recognizer);
 
 
 //dialog to ask for a task name
@@ -67,7 +73,7 @@ bot.dialog('askForTaskName',[
         }
     }
 ]).triggerAction({
-    matches: /^add task$/i,
+    matches: 'AddTask'
 });
 
 
@@ -98,7 +104,7 @@ bot.dialog('getTodos',[
         session.endDialogWithResult();
     }
 ]).triggerAction({
-    matches: /^show tasks$/i,
+    matches: 'GetTasks'
 });
 
 function getFormatedTodos (todos) {
