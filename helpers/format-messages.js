@@ -8,4 +8,4 @@ function getFormatedTodos(todos) {
     return todosResponse;
 }
 
-module.exports = { getFormatedTodos };
+export { getFormatedTodos };

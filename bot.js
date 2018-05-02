@@ -1,22 +1,24 @@
 global.builder = require('botbuilder');
+
 import config from './config';
+import formatMessages from './helpers/format-messages';
+import {messages} from './constants/messages';
+import intents from './constants/intents';
+
 const regexpYes = /^yes$/i;
 const regexpNo = /^no$/i;
 let db = config.db;
 
-let formatMessages = require('./helpers/format-messages');
 
-function create(connector) {
+function botCreate(connector) {
     let inMemoryStorage = new builder.MemoryBotStorage();
 
     let bot = new builder.UniversalBot(connector,
         function (session) {
+            const userName = session.message.user.name;
+
             session.send(
-                'Hi man. <br/> ' +
-                'Here are commands you can use:<br/>' +
-                '"add task" to create new task :)<br/>' +
-                '"show tasks" to get you task list.<br/>' +
-                'Have a nice journey!!!');
+                messages.getBotGreetingMessage(userName));
         }
     ).set('storage', inMemoryStorage);
 
@@ -27,9 +29,9 @@ function create(connector) {
     bot.recognizer(recognizer);
 
     //dialog to ask for a task name
-    bot.dialog('askForTaskName', [
+    bot.dialog(intents.askForTaskName, [
         (session) => {
-            builder.Prompts.text(session, "What is new task name?");
+            builder.Prompts.text(session, messages.getWhatNewTaskName());
         },
         async (session, results, next) => {
             let todo = {
@@ -39,32 +41,34 @@ function create(connector) {
 
             try {
                 const result = await db.todos.save(todo);
-                session.send(`Ok, I've saved your task :"${results.response}" in my database.`);
+                session.send(messages.getSavedTask(results.response));
                 next();
             } catch (e) {
                 console.error(e);
-                session.send(`Ups!! Cannot save "${results.response}" in my database... Please try again`);
+                session.send(messages.getCannotSaveTask(results.response));
                 session.endDialog();
             }
         },
         (session) => {
-            builder.Prompts.text(session, 'do you want to add one more? "yes/no"? ');
+            const userName = session.message.user.name;
+
+            builder.Prompts.text(session, messages.getWantAddMore(userName));
         },
         (session, results) => {
             if (results && results.response.match(regexpYes)) {
-                session.beginDialog('askForTaskName');
+                session.beginDialog(intents.askForTaskName);
             } else {
-                session.send('Ok. no problem.');
+                session.send(messages.getNoProblem());
                 session.endDialog();
             }
         }
     ]).triggerAction({
-        matches: 'AddTask'
+        matches: intents.AddTask
     });
 
 
 //dialog to get tasks
-    bot.dialog('getTodos', [
+    bot.dialog(intents.GetTasks, [
         async (session) => {
             const findQuery = {'userId': session.message.user.id};
             let todosResponse = '';
@@ -77,21 +81,21 @@ function create(connector) {
                     todosResponse = formatMessages.getFormatedTodos(todos);
                     textMessage = `Here are your task(s):<br/> ${todosResponse}`
                 } else {
-                    textMessage = 'You do not have any task scheduled';
+                    textMessage = messages.getYouDontHaveTasks();
                 }
 
                 session.send(textMessage);
 
             } catch (e) {
                 console.error(e);
-                session.send(`Ups!! Cannot get items`);
+                session.send(messages.getCnnotGetItems());
             }
 
             session.endDialogWithResult();
         }
     ]).triggerAction({
-        matches: 'GetTasks'
+        matches: intents.GetTasks
     });
 }
 
-module.exports = {create};
+export {botCreate};
