@@ -23,7 +23,7 @@ function botCreate(connector) {
     bot.recognizer(recognizer);
 
     //None intent dialog **************************************************
-    bot.dialog(intents.None,function (session) {
+    bot.dialog(intents.None, function (session) {
         const userName = session.message.user.name;
 
         session.send(
@@ -35,7 +35,7 @@ function botCreate(connector) {
         });
 
     //greeting dialog ****************************************************
-    bot.dialog(intents.Greeting,function (session) {
+    bot.dialog(intents.Greeting, function (session) {
         const userName = session.message.user.name;
 
         session.send(
@@ -55,7 +55,9 @@ function botCreate(connector) {
         async (session, results, next) => {
             let todo = {
                 title: results.response,
-                userId: session.message.user.id
+                userId: session.message.user.id,
+                isRemoved: false,
+                isDone: false
             };
 
             try {
@@ -89,7 +91,7 @@ function botCreate(connector) {
 //dialog to get tasks ***************************************************************
     bot.dialog(intents.GetTasks, [
         async (session) => {
-            const findQuery = {'userId': session.message.user.id};
+            const findQuery = {'userId': session.message.user.id, 'isRemoved': false};
             const userName = session.message.user.name;
             let todosResponse = '';
             let textMessage;
@@ -99,7 +101,7 @@ function botCreate(connector) {
 
                 if (todos && todos.length) {
                     todosResponse = getFormatedTodos(todos);
-                    textMessage = `Here are your task(s), ${userName}:<br/> ${todosResponse}`
+                    textMessage = `Here are your task(s), ${userName}:<br/> ${todosResponse}<br/><br/>${messages.getWantDoTaskActions()}`
                 } else {
                     textMessage = messages.getYouDontHaveTasks();
                 }

@@ -21,8 +21,8 @@ let messages = {
         return `Ups!! Cannot save "${text}" in my database... Please try again`;
     },
     getWantAddMore: (text) => {
-    return `${text}, do you want to add one more? "yes/no"? `
-},
+        return `${text}, do you want to add one more? "yes/no"? `
+    },
     getNoProblem: ()=> {
         return `Ok. no problem.Catch you later.`
     },
@@ -35,6 +35,10 @@ let messages = {
     },
     getDontUnderstanYou: (username)=> {
         return `I don't fallow you, ${username}. Please try to use other sentences.`;
+    },
+    getWantDoTaskActions: ()=> {
+        return 'Do you want to do some actions with tasks?<br/>' +
+            'Maybe mark as done or remove task from list or add one? Don`t hesitate to ask me';
     }
 };
 

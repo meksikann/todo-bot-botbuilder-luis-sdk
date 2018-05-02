@@ -2,7 +2,9 @@ function getFormatedTodos(todos) {
     let todosResponse = '';
 
     todos.forEach(todo => {
-        todosResponse += `- ${todo.title} <br/>`;
+        let item = todo.isDone ? `- ~~${todo.title}~~<br/>` : `- ${todo.title}<br/>`;
+
+        todosResponse += item;
     });
 
     return todosResponse;
