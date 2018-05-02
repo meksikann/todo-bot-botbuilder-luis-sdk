@@ -13,13 +13,7 @@ let db = config.db;
 function botCreate(connector) {
     let inMemoryStorage = new builder.MemoryBotStorage();
 
-    let bot = new builder.UniversalBot(connector,
-        function (session) {
-            const userName = session.message.user.name;
-
-            session.send(
-                messages.getBotGreetingMessage(userName));
-        }
+    let bot = new builder.UniversalBot(connector
     ).set('storage', inMemoryStorage);
 
 
@@ -28,7 +22,32 @@ function botCreate(connector) {
 
     bot.recognizer(recognizer);
 
-    //dialog to ask for a task name
+    //None intent dialog **************************************************
+    bot.dialog(intents.None,function (session) {
+        const userName = session.message.user.name;
+
+        session.send(
+            messages.getDontUnderstanYou(userName));
+        session.endDialog();
+    })
+        .triggerAction({
+            matches: intents.None
+        });
+
+    //greeting dialog ****************************************************
+    bot.dialog(intents.Greeting,function (session) {
+        const userName = session.message.user.name;
+
+        session.send(
+            messages.getBotGreetingMessage(userName));
+        session.endDialog();
+    })
+        .triggerAction({
+            matches: intents.Greeting
+        });
+
+
+    //dialog to ask for a task name *****************************************
     bot.dialog(intents.askForTaskName, [
         (session) => {
             builder.Prompts.text(session, messages.getWhatNewTaskName());
@@ -52,10 +71,10 @@ function botCreate(connector) {
         (session) => {
             const userName = session.message.user.name;
 
-            builder.Prompts.text(session, messages.getWantAddMore(userName));
+            builder.Prompts.confirm(session, messages.getWantAddMore(userName));
         },
         (session, results) => {
-            if (results && results.response.match(regexpYes)) {
+            if (results.response) {
                 session.beginDialog(intents.askForTaskName);
             } else {
                 session.send(messages.getNoProblem());
@@ -67,10 +86,11 @@ function botCreate(connector) {
     });
 
 
-//dialog to get tasks
+//dialog to get tasks ***************************************************************
     bot.dialog(intents.GetTasks, [
         async (session) => {
             const findQuery = {'userId': session.message.user.id};
+            const userName = session.message.user.name;
             let todosResponse = '';
             let textMessage;
 
@@ -79,7 +99,7 @@ function botCreate(connector) {
 
                 if (todos && todos.length) {
                     todosResponse = getFormatedTodos(todos);
-                    textMessage = `Here are your task(s):<br/> ${todosResponse}`
+                    textMessage = `Here are your task(s), ${userName}:<br/> ${todosResponse}`
                 } else {
                     textMessage = messages.getYouDontHaveTasks();
                 }
