@@ -1,7 +1,7 @@
 global.builder = require('botbuilder');
 
 import config from './config';
-import formatMessages from './helpers/format-messages';
+import {getFormatedTodos} from './helpers/format-messages';
 import {messages} from './constants/messages';
 import intents from './constants/intents';
 
@@ -78,7 +78,7 @@ function botCreate(connector) {
                 let todos = await db.collection('todos').findAsCursor(findQuery).toArray();
 
                 if (todos && todos.length) {
-                    todosResponse = formatMessages.getFormatedTodos(todos);
+                    todosResponse = getFormatedTodos(todos);
                     textMessage = `Here are your task(s):<br/> ${todosResponse}`
                 } else {
                     textMessage = messages.getYouDontHaveTasks();
