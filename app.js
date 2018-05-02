@@ -4,6 +4,7 @@ const HttpStatus = require('http-status-codes');
 const serverResponseMessages = require('./constants/serverResponse');
 let bot = require('./bot.js');
 let server = restify.createServer();
+require('dotenv').config();
 
 //setup server
 server.listen(3978, () => {

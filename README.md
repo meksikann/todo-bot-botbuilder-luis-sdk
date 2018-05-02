@@ -10,15 +10,16 @@ LUIS Application
 
 The first step to using LUIS is to create or import an application. Go to the home page, www.luis.ai, and log in. After creating your LUIS account you'll be able to Import an Existing Application where can you can select a local copy of the LuisBot.json file an import it.
 ========================================================================
-#setup
+#setup (babel used)
 
 set mongodb local server
 start mongod db: sudo systemctl start mongod
 create db  with name: "todobot"
 create collection  with name: "todos"
 navigate to cloned project directory
+paste LUIS_MODEL_URL=<your LUIS_APP_PATH_HERE> in .env file
 installation: npm install
-start: LUIS_MODEL_URL="your luis model url go here" node app.js
+start:npm start
 
 How to test the bot:
 

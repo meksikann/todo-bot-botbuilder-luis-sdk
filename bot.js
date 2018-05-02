@@ -1,5 +1,5 @@
 global.builder = require('botbuilder');
-const config = require('./config');
+import config from './config';
 const regexpYes = /^yes$/i;
 const regexpNo = /^no$/i;
 let db = config.db;
@@ -84,7 +84,7 @@ function create(connector) {
 
             } catch (e) {
                 console.error(e);
-                session.send(`Ups!! Cannot save "${results.response}" in my database... Please try again`);
+                session.send(`Ups!! Cannot get items`);
             }
 
             session.endDialogWithResult();
