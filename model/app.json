@@ -1,8 +1,8 @@
 {
   "luis_schema_version": "2.1.0",
-  "versionId": "0.2",
+  "versionId": "0.3",
   "name": "Todo-Agent 0.2",
-  "desc": "This LUIS app has a  AddTask, GetTasks, FinishTask, Greeting, and None intents.",
+  "desc": "This LUIS app has a  AddTask, GetTasks, FinishTask, Greeting,RemoveTask and None intents.",
   "culture": "en-us",
   "intents": [
     {
@@ -19,6 +19,9 @@
     },
     {
       "name": "None"
+    },
+    {
+      "name": "RemoveTask"
     }
   ],
   "entities": [
@@ -139,7 +142,7 @@
       "entities": []
     },
     {
-      "text": "remove task",
+      "text": "make task as done",
       "intent": "FinishTask",
       "entities": []
     },
@@ -151,6 +154,36 @@
     {
       "text": "It is done",
       "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "remove task",
+      "intent": "RemoveTask",
+      "entities": []
+    },
+    {
+      "text": "delete it",
+      "intent": "RemoveTask",
+      "entities": []
+    },
+    {
+      "text": "remove from list",
+      "intent": "RemoveTask",
+      "entities": []
+    },
+    {
+      "text": "take it out",
+      "intent": "RemoveTask",
+      "entities": []
+    },
+    {
+      "text": "bla bla",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "I write stupid stuff",
+      "intent": "None",
       "entities": []
     }
   ]

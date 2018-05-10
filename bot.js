@@ -171,6 +171,16 @@ function botCreate(connector) {
     ]).triggerAction({
         matches: intents.FinishTask
     });
+
+    //TODO: do this fnx
+    bot.dialog(intents.RemoveTask, [
+        async (session) => {
+          session.send('do you wanna delete task from list?');
+            session.endDialog();
+        }
+    ]).triggerAction({
+        matches: intents.RemoveTask
+    });
 }
 
-export {botCreate};
+export {botCreate};``
