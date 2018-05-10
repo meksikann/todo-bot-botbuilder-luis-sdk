@@ -5,7 +5,8 @@ const intents = {
     'AddTask': null,
     'GetTasks': null,
     'Greeting': null,
-    'None': null
+    'None': null,
+    'FinishTask': null
 };
 
 export default keyMirror(intents);

@@ -1,7 +1,8 @@
 global.builder = require('botbuilder');
 
+import mongojs from 'mongoist';
 import config from './config';
-import {getFormatedTodos} from './helpers/format-messages';
+import {getFormatedTodos, getNumberedTodos} from './helpers/format-messages';
 import {messages} from './constants/messages';
 import intents from './constants/intents';
 
@@ -33,6 +34,7 @@ function botCreate(connector) {
         .triggerAction({
             matches: intents.None
         });
+
 
     //greeting dialog ****************************************************
     bot.dialog(intents.Greeting, function (session) {
@@ -110,13 +112,64 @@ function botCreate(connector) {
 
             } catch (e) {
                 console.error(e);
-                session.send(messages.getCnnotGetItems());
+                session.send(messages.getCannotGetItems());
             }
 
             session.endDialogWithResult();
         }
     ]).triggerAction({
         matches: intents.GetTasks
+    });
+
+    bot.dialog(intents.FinishTask, [
+        async (session) => {
+            const findQuery = {'userId': session.message.user.id, 'isRemoved': false, 'isDone': false};
+            let todosResponse = [];
+            let textMessage;
+            try {
+                let todos = await db.collection('todos').findAsCursor(findQuery).toArray();
+
+                if (todos && todos.length) {
+                    session.userData.todosForFinish = todos;
+
+                    todosResponse = getNumberedTodos(todos);
+                    textMessage = `Please choose an task number to mark as done and press 'Enter'<br/>${todosResponse}`
+                } else {
+                    textMessage = messages.getYouDontHaveTasks();
+                }
+
+                builder.Prompts.number(session, textMessage);
+            } catch(err) {
+                console.error(err);
+                session.send(messages.getCannotGetItems());
+            }
+        },
+        async (session, results) => {
+            const userName = session.message.user.name;
+            const todos = session.userData.todosForFinish;
+            const taskNumber = results.response;
+
+            const taskName = todos[taskNumber - 1] ? todos[taskNumber - 1].title: null;
+            const taskId = todos[taskNumber - 1] ? todos[taskNumber - 1]._id : null;
+
+            if(taskId) {
+                //mark task as done in db
+                try{
+                    const result = await db.collection('todos').update({'_id': mongojs.ObjectId(taskId)},{$set:{'isDone':true}});
+
+                    session.send(messages.getMarkedTaskDone(userName, taskName));
+                } catch(err){
+                    console.error((err));
+                    session.send(messages.noItemFound);
+                }
+            } else {
+                session.send(messages.noItemFound);
+            }
+
+            session.endDialog();
+        }
+    ]).triggerAction({
+        matches: intents.FinishTask
     });
 }
 

@@ -10,4 +10,16 @@ function getFormatedTodos(todos) {
     return todosResponse;
 }
 
-export { getFormatedTodos };
+function getNumberedTodos(todos) {
+    let todosResponse = '';
+
+    todos.forEach((todo, index) => {
+        let item = `${index+1}) ${todo.title}<br/>`;
+
+        todosResponse += item;
+    });
+
+    return todosResponse;
+}
+
+export { getFormatedTodos, getNumberedTodos };

@@ -30,7 +30,7 @@ let messages = {
         return `You do not have any task scheduled`;
     },
 
-    getCnnotGetItems: ()=> {
+    getCannotGetItems: ()=> {
         return `Ups!! Cannot get items`;
     },
     getDontUnderstanYou: (username)=> {
@@ -39,7 +39,14 @@ let messages = {
     getWantDoTaskActions: ()=> {
         return 'Do you want to do some actions with tasks?<br/>' +
             'Maybe mark as done or remove task from list or add one? Don`t hesitate to ask me';
-    }
+    },
+    getWhatTaskFinished: () => {
+        return 'What task have you finished? please pick a number...';
+    },
+    getMarkedTaskDone: (userName, taskName) => {
+        return `Great, ${userName}! I've marked "${taskName}" as done."`
+    },
+    noItemFound: 'No item found'
 };
 
 
