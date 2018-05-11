@@ -1,15 +1,12 @@
 global.builder = require('botbuilder');
 
-import mongojs from 'mongoist';
-import config from './config';
 import {getFormatedTodos, getNumberedTodos} from './helpers/format-messages';
 import {messages} from './constants/messages';
 import intents from './constants/intents';
+import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks} from './helpers/database-queries';
 
 const regexpYes = /^yes$/i;
 const regexpNo = /^no$/i;
-let db = config.db;
-
 
 function botCreate(connector) {
     let inMemoryStorage = new builder.MemoryBotStorage();
@@ -63,7 +60,7 @@ function botCreate(connector) {
             };
 
             try {
-                const result = await db.todos.save(todo);
+                const result = await addTask(todo);
                 session.send(messages.getSavedTask(results.response));
                 next();
             } catch (e) {
@@ -93,13 +90,12 @@ function botCreate(connector) {
 //dialog to get tasks ***************************************************************
     bot.dialog(intents.GetTasks, [
         async (session) => {
-            const findQuery = {'userId': session.message.user.id, 'isRemoved': false};
             const userName = session.message.user.name;
             let todosResponse = '';
             let textMessage;
 
             try {
-                let todos = await db.collection('todos').findAsCursor(findQuery).toArray();
+                let todos = await getAllTasks(session.message.user.id);
 
                 if (todos && todos.length) {
                     todosResponse = getFormatedTodos(todos);
@@ -123,11 +119,11 @@ function botCreate(connector) {
 
     bot.dialog(intents.FinishTask, [
         async (session) => {
-            const findQuery = {'userId': session.message.user.id, 'isRemoved': false, 'isDone': false};
             let todosResponse = [];
             let textMessage;
+            let userId = session.message.user.id;
             try {
-                let todos = await db.collection('todos').findAsCursor(findQuery).toArray();
+                let todos = await getActiveTasks(userId);
 
                 if (todos && todos.length) {
                     session.userData.todosForFinish = todos;
@@ -139,7 +135,7 @@ function botCreate(connector) {
                 }
 
                 builder.Prompts.number(session, textMessage);
-            } catch(err) {
+            } catch (err) {
                 console.error(err);
                 session.send(messages.getCannotGetItems());
             }
@@ -149,16 +145,16 @@ function botCreate(connector) {
             const todos = session.userData.todosForFinish;
             const taskNumber = results.response;
 
-            const taskName = todos[taskNumber - 1] ? todos[taskNumber - 1].title: null;
+            const taskName = todos[taskNumber - 1] ? todos[taskNumber - 1].title : null;
             const taskId = todos[taskNumber - 1] ? todos[taskNumber - 1]._id : null;
 
-            if(taskId) {
+            if (taskId) {
                 //mark task as done in db
-                try{
-                    const result = await db.collection('todos').update({'_id': mongojs.ObjectId(taskId)},{$set:{'isDone':true}});
+                try {
+                    let todos = await markAsDone(taskId);
 
                     session.send(messages.getMarkedTaskDone(userName, taskName));
-                } catch(err){
+                } catch (err) {
                     console.error((err));
                     session.send(messages.noItemFound);
                 }
@@ -172,15 +168,64 @@ function botCreate(connector) {
         matches: intents.FinishTask
     });
 
-    //TODO: do this fnx
     bot.dialog(intents.RemoveTask, [
         async (session) => {
-          session.send('do you wanna delete task from list?');
+            let todosResponse = [];
+            let textMessage;
+            let userId = session.message.user.id;
+            try {
+                let todos = await getAllTasks(userId);
+
+                if (todos && todos.length) {
+                    session.userData.todosForRemove = todos;
+
+                    todosResponse = getNumberedTodos(todos);
+                    textMessage = `Please choose an task number to remove and press 'Enter'<br/>${todosResponse}`
+                } else {
+                    textMessage = messages.getYouDontHaveTasks();
+                }
+
+                builder.Prompts.number(session, textMessage);
+            } catch (err) {
+                console.error(err);
+                session.send(messages.getCannotGetItems());
+            }
+        },
+        async (session, results) => {
+            const userName = session.message.user.name;
+            const todos = session.userData.todosForRemove;
+            const taskNumber = results.response;
+
+            const taskName = todos[taskNumber - 1] ? todos[taskNumber - 1].title : null;
+            const taskId = todos[taskNumber - 1] ? todos[taskNumber - 1]._id : null;
+
+            if (taskId) {
+                //remove task from db
+                try {
+                    let todos = await removeTask(taskId);
+                    //const result = await db.collection('todos').update({'_id': mongojs.ObjectId(taskId)},{$set:{'isDone':true}});
+
+                    session.send(messages.getRemovedTask(userName, taskName));
+                } catch (err) {
+                    console.error((err));
+                    session.send(messages.noItemFound);
+                }
+            } else {
+                session.send(messages.noItemFound);
+            }
+
             session.endDialog();
         }
     ]).triggerAction({
         matches: intents.RemoveTask
     });
+
+    bot.dialog(intents.cancelConversation, (session) => {
+            session.endConversation(messages.cancelConversation);
+        }
+    ).triggerAction({
+            matches: intents.cancelConversation
+        })
 }
 
-export {botCreate};``
+export {botCreate};

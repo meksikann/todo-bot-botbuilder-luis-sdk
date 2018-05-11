@@ -1,8 +1,8 @@
 {
   "luis_schema_version": "2.1.0",
-  "versionId": "0.3",
-  "name": "Todo-Agent 0.2",
-  "desc": "This LUIS app has a  AddTask, GetTasks, FinishTask, Greeting,RemoveTask and None intents.",
+  "versionId": "0.4",
+  "name": "Todo-Agent 0.4",
+  "desc": "This LUIS app has a  AddTask, GetTasks, FinishTask, Greeting,RemoveTask,cancelConversation and None intents.",
   "culture": "en-us",
   "intents": [
     {
@@ -22,6 +22,9 @@
     },
     {
       "name": "RemoveTask"
+    },
+    {
+      "name": "cancelConversation"
     }
   ],
   "entities": [
@@ -88,6 +91,11 @@
     },
     {
       "text": "what shell I do today",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "get my stuff",
       "intent": "GetTasks",
       "entities": []
     },
@@ -184,6 +192,31 @@
     {
       "text": "I write stupid stuff",
       "intent": "None",
+      "entities": []
+    },
+    {
+      "text":"cancel",
+      "intent":"cancelConversation",
+      "entities": []
+    },
+    {
+      "text":"stop",
+      "intent":"cancelConversation",
+      "entities": []
+    },
+    {
+      "text":"start over",
+      "intent":"cancelConversation",
+      "entities": []
+    },
+    {
+      "text":"forget",
+      "intent":"cancelConversation",
+      "entities": []
+    },
+    {
+      "text":"dismiss",
+      "intent":"cancelConversation",
       "entities": []
     }
   ]

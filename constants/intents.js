@@ -7,7 +7,8 @@ const intents = {
     'Greeting': null,
     'None': null,
     'FinishTask': null,
-    'RemoveTask': null
+    'RemoveTask': null,
+    'cancelConversation': null
 };
 
 export default keyMirror(intents);

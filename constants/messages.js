@@ -2,6 +2,9 @@ let messages = {
     serverResponseMessages: {
         listening: "listening on"
     },
+    /***************************************************************************************
+    * ****************************** get methods *******************************************
+    * **************************************************************************************/
     getBotGreetingMessage: (userName) => {
         return `Hi, ${userName}.
         Let me show you what I can do -
@@ -46,7 +49,14 @@ let messages = {
     getMarkedTaskDone: (userName, taskName) => {
         return `Great, ${userName}! I've marked "${taskName}" as done."`
     },
-    noItemFound: 'No item found'
+    getRemovedTask: (userName, taskName) => {
+        return `Great, ${userName}! I've removed "${taskName}" .`
+    },
+    /**************************************************************************
+    ******************************* string constants **************************
+     **************************************************************************/
+    noItemFound: 'No item found',
+    cancelConversation: "Canceling our conversation. Bye, bye.. :)"
 };
 
 
