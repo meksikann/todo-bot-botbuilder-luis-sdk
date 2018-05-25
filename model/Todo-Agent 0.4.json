@@ -1,6 +1,6 @@
 {
   "luis_schema_version": "3.0.0",
-  "versionId": "0.12",
+  "versionId": "0.13",
   "name": "Todo-Agent 0.4",
   "desc": "This LUIS app has a  AddTask, GetTasks, FinishTask, Greeting,RemoveTask,cancelConversation and None intents.",
   "culture": "en-us",
@@ -37,7 +37,12 @@
   "closedLists": [],
   "patternAnyEntities": [],
   "regex_entities": [],
-  "prebuiltEntities": [],
+  "prebuiltEntities": [
+    {
+      "name": "ordinal",
+      "roles": []
+    }
+  ],
   "model_features": [],
   "regex_features": [],
   "patterns": [
@@ -46,11 +51,11 @@
       "intent": "AddTask"
     },
     {
-      "pattern": "create task {taskName}",
+      "pattern": "add item {taskName}",
       "intent": "AddTask"
     },
     {
-      "pattern": "add item {taskName}",
+      "pattern": "create task {taskName}",
       "intent": "AddTask"
     }
   ],
@@ -66,9 +71,15 @@
       "entities": []
     },
     {
-      "text": "add one",
+      "text": "add item test some stuff and be happy with results",
       "intent": "AddTask",
-      "entities": []
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 9,
+          "endPos": 49
+        }
+      ]
     },
     {
       "text": "add task",
@@ -87,29 +98,13 @@
       ]
     },
     {
-      "text": "add the task - do something",
+      "text": "add task when weather is good ride a bike",
       "intent": "AddTask",
       "entities": [
         {
           "entity": "taskName",
-          "startPos": 15,
-          "endPos": 16
-        },
-        {
-          "entity": "taskName",
-          "startPos": 18,
-          "endPos": 26
-        }
-      ]
-    },
-    {
-      "text": "add the task test text",
-      "intent": "AddTask",
-      "entities": [
-        {
-          "entity": "taskName",
-          "startPos": 13,
-          "endPos": 21
+          "startPos": 9,
+          "endPos": 40
         }
       ]
     },
@@ -141,6 +136,83 @@
           "entity": "taskName",
           "startPos": 14,
           "endPos": 67
+        }
+      ]
+    },
+    {
+      "text": "create item - do some extra testing with entity extraction",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 14,
+          "endPos": 57
+        }
+      ]
+    },
+    {
+      "text": "create item - when model is done - move to next task",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 14,
+          "endPos": 51
+        }
+      ]
+    },
+    {
+      "text": "create item get intity",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 21
+        }
+      ]
+    },
+    {
+      "text": "create item give feedback",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 24
+        }
+      ]
+    },
+    {
+      "text": "create item test with my personal bot what ill happen when i type some long task name and than can train and publish model when it works greate",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 142
+        }
+      ]
+    },
+    {
+      "text": "create task - check why model gives such bed results with entities",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 14,
+          "endPos": 65
+        }
+      ]
+    },
+    {
+      "text": "create task - what is rest",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 14,
+          "endPos": 25
         }
       ]
     },
@@ -178,13 +250,13 @@
       ]
     },
     {
-      "text": "create task cheking1",
+      "text": "create task check the utterances",
       "intent": "AddTask",
       "entities": [
         {
           "entity": "taskName",
           "startPos": 12,
-          "endPos": 19
+          "endPos": 31
         }
       ]
     },
@@ -200,24 +272,24 @@
       ]
     },
     {
-      "text": "create task do something wrong",
+      "text": "create task do some extra testing on item 123",
       "intent": "AddTask",
       "entities": [
         {
           "entity": "taskName",
           "startPos": 12,
-          "endPos": 29
+          "endPos": 44
         }
       ]
     },
     {
-      "text": "create task go home",
+      "text": "create task do some stuff",
       "intent": "AddTask",
       "entities": [
         {
           "entity": "taskName",
-          "startPos": 11,
-          "endPos": 18
+          "startPos": 12,
+          "endPos": 24
         }
       ]
     },
@@ -240,6 +312,28 @@
           "entity": "taskName",
           "startPos": 12,
           "endPos": 17
+        }
+      ]
+    },
+    {
+      "text": "create tasks - do the best tests",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 15,
+          "endPos": 31
+        }
+      ]
+    },
+    {
+      "text": "create todo - begin some marketing actions",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 14,
+          "endPos": 41
         }
       ]
     },
@@ -350,6 +444,11 @@
     },
     {
       "text": "remove from list",
+      "intent": "RemoveTask",
+      "entities": []
+    },
+    {
+      "text": "remove second task",
       "intent": "RemoveTask",
       "entities": []
     },
