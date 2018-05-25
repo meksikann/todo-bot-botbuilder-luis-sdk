@@ -3,6 +3,7 @@ global.builder = require('botbuilder');
 import {getFormatedTodos, getNumberedTodos} from './helpers/format-messages';
 import {messages} from './constants/messages';
 import intents from './constants/intents';
+import {entities} from './constants/entities';
 import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks} from './helpers/database-queries';
 
 const regexpYes = /^yes$/i;
@@ -48,8 +49,24 @@ function botCreate(connector) {
 
     //dialog to ask for a task name *****************************************
     bot.dialog(intents.askForTaskName, [
-        (session) => {
-            builder.Prompts.text(session, messages.getWhatNewTaskName());
+        (session, args, next) => {
+
+            //TODO: entity not shown here. maybe need more learning......
+            console.log('args----------------------->', args);
+            if(args) {
+                let intent = args.intent;
+                let entity = builder.EntityRecognizer.findEntity(intent.entities, 'taskName');
+                console.log('found entity------------------------------->', entity);
+
+                if(entity && entity.type == entities.taskName) {
+                    next({ response: entity.entity })
+                } else {
+                    builder.Prompts.text(session, messages.getWhatNewTaskName());
+                }
+            } else {
+                builder.Prompts.text(session, messages.getWhatNewTaskName());
+            }
+
         },
         async (session, results, next) => {
             let todo = {
@@ -117,6 +134,7 @@ function botCreate(connector) {
         matches: intents.GetTasks
     });
 
+//dialog to set task as done *********************************************************
     bot.dialog(intents.FinishTask, [
         async (session) => {
             let todosResponse = [];
@@ -168,6 +186,7 @@ function botCreate(connector) {
         matches: intents.FinishTask
     });
 
+    //Dialog to remove task **********************************************************
     bot.dialog(intents.RemoveTask, [
         async (session) => {
             let todosResponse = [];
@@ -220,6 +239,7 @@ function botCreate(connector) {
         matches: intents.RemoveTask
     });
 
+    //dialog to cancel conversation **************************************************
     bot.dialog(intents.cancelConversation, (session) => {
             session.endConversation(messages.cancelConversation);
         }

@@ -1,0 +1,442 @@
+{
+  "luis_schema_version": "3.0.0",
+  "versionId": "0.12",
+  "name": "Todo-Agent 0.4",
+  "desc": "This LUIS app has a  AddTask, GetTasks, FinishTask, Greeting,RemoveTask,cancelConversation and None intents.",
+  "culture": "en-us",
+  "intents": [
+    {
+      "name": "AddTask"
+    },
+    {
+      "name": "cancelConversation"
+    },
+    {
+      "name": "FinishTask"
+    },
+    {
+      "name": "GetTasks"
+    },
+    {
+      "name": "Greeting"
+    },
+    {
+      "name": "None"
+    },
+    {
+      "name": "RemoveTask"
+    }
+  ],
+  "entities": [
+    {
+      "name": "taskName",
+      "roles": []
+    }
+  ],
+  "composites": [],
+  "closedLists": [],
+  "patternAnyEntities": [],
+  "regex_entities": [],
+  "prebuiltEntities": [],
+  "model_features": [],
+  "regex_features": [],
+  "patterns": [
+    {
+      "pattern": "add task - {taskName}",
+      "intent": "AddTask"
+    },
+    {
+      "pattern": "create task {taskName}",
+      "intent": "AddTask"
+    },
+    {
+      "pattern": "add item {taskName}",
+      "intent": "AddTask"
+    }
+  ],
+  "utterances": [
+    {
+      "text": "2",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "5",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "add one",
+      "intent": "AddTask",
+      "entities": []
+    },
+    {
+      "text": "add task",
+      "intent": "AddTask",
+      "entities": []
+    },
+    {
+      "text": "add task - find context",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 11,
+          "endPos": 22
+        }
+      ]
+    },
+    {
+      "text": "add the task - do something",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 15,
+          "endPos": 16
+        },
+        {
+          "entity": "taskName",
+          "startPos": 18,
+          "endPos": 26
+        }
+      ]
+    },
+    {
+      "text": "add the task test text",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 13,
+          "endPos": 21
+        }
+      ]
+    },
+    {
+      "text": "bla bla",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "cancel",
+      "intent": "cancelConversation",
+      "entities": []
+    },
+    {
+      "text": "check if db collection creates",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "check removal state",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "create item - check why i cannot get some long item name from entity",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 14,
+          "endPos": 67
+        }
+      ]
+    },
+    {
+      "text": "create task bad responce",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 23
+        }
+      ]
+    },
+    {
+      "text": "create task check again",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 22
+        }
+      ]
+    },
+    {
+      "text": "create task check entity",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 23
+        }
+      ]
+    },
+    {
+      "text": "create task cheking1",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 19
+        }
+      ]
+    },
+    {
+      "text": "create task dndndn",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 17
+        }
+      ]
+    },
+    {
+      "text": "create task do something wrong",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 29
+        }
+      ]
+    },
+    {
+      "text": "create task go home",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 11,
+          "endPos": 18
+        }
+      ]
+    },
+    {
+      "text": "create task testone",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 18
+        }
+      ]
+    },
+    {
+      "text": "create task yellow",
+      "intent": "AddTask",
+      "entities": [
+        {
+          "entity": "taskName",
+          "startPos": 12,
+          "endPos": 17
+        }
+      ]
+    },
+    {
+      "text": "delete it",
+      "intent": "RemoveTask",
+      "entities": []
+    },
+    {
+      "text": "dismiss",
+      "intent": "cancelConversation",
+      "entities": []
+    },
+    {
+      "text": "finish the task",
+      "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "forget",
+      "intent": "cancelConversation",
+      "entities": []
+    },
+    {
+      "text": "get my stuff",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "get tasks",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "hello",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "hey there",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "hi",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "how are you?",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "i am done",
+      "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "i write stupid stuff",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "it is done",
+      "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "it's finished",
+      "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "list",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "list my tasks",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "make better intents structure",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "make task as done",
+      "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "mark as done",
+      "intent": "FinishTask",
+      "entities": []
+    },
+    {
+      "text": "no",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "remove",
+      "intent": "RemoveTask",
+      "entities": []
+    },
+    {
+      "text": "remove from list",
+      "intent": "RemoveTask",
+      "entities": []
+    },
+    {
+      "text": "remove task",
+      "intent": "RemoveTask",
+      "entities": []
+    },
+    {
+      "text": "show me my stuff",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "show me my tasks",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "show my my stuff",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "show my stuff",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "show my tasks",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "start over",
+      "intent": "cancelConversation",
+      "entities": []
+    },
+    {
+      "text": "stop",
+      "intent": "cancelConversation",
+      "entities": []
+    },
+    {
+      "text": "take it out",
+      "intent": "RemoveTask",
+      "entities": []
+    },
+    {
+      "text": "task list",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "welcome",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "what is my tasks",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "what is my work for today?",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "what shell i do today",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "what's my stuff",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "where do you live?",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "рш",
+      "intent": "None",
+      "entities": []
+    }
+  ]
+}
