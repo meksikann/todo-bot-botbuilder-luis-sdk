@@ -19,7 +19,7 @@
   "homepage": "https://github.com/meksikann/todo-bot-botbuilder-luis-sdk#readme",
   "dependencies": {
     "axios": "^0.18.0",
-    "botbuilder": "^3.14.1",
+    "botbuilder": "^3.15.0",
     "dotenv": "^5.0.1",
     "http-status-codes": "^1.3.0",
     "keymirror": "^0.1.1",

@@ -45,6 +45,11 @@ function botCreate(connector) {
             messages.getBotGreetingMessage(userName));
         session.endDialog();
 
+        //var msg = new builder.Message(session)
+        //    .speak('This is the text that will be spoken.')
+        //    .inputHint(builder.InputHint.expectingInput);
+        //session.send(msg).endDialog();
+
         //session.say('Please hold while I calculate a response.',
         //    'Please hold while I calculate a response.',
         //    { inputHint: builder.InputHint.ignoringInput }
@@ -75,14 +80,14 @@ function botCreate(connector) {
                 if(entity && entity.type == entities.taskName) {
                     next({ response: entity.entity })
                 } else {
-                    builder.Prompts.text(session, messages.getWhatNewTaskName());
                     botSayInFestival({message:'please provide a task name'});
+                    builder.Prompts.text(session, messages.getWhatNewTaskName());
+
                 }
             } else {
-                builder.Prompts.text(session, messages.getWhatNewTaskName());
                 botSayInFestival({message:'please provide a task name'});
+                builder.Prompts.text(session, messages.getWhatNewTaskName());
             }
-
         },
         async (session, results, next) => {
             let todo = {
@@ -100,8 +105,9 @@ function botCreate(connector) {
                 //next();
             } catch (e) {
                 console.error(e);
-                session.send(messages.getCannotSaveTask(results.response));
                 botSayInFestival({message:'Failed to save task'});
+                session.send(messages.getCannotSaveTask(results.response));
+
                 session.endDialog();
             }
         },
@@ -115,8 +121,9 @@ function botCreate(connector) {
                 session.beginDialog(intents.askForTaskName);
             } else {
                 session.send(messages.getNoProblem());
-                botSayInFestival({message: messages.getNoProblem()});
-                session.endDialog();
+                botSayInFestival({message: messages.getNoProblem(),callback: ()=>{
+                    session.endDialog();
+                }});
             }
         }
     ]).triggerAction({
@@ -136,20 +143,20 @@ function botCreate(connector) {
 
                 if (todos && todos.length) {
                     todosResponse = getFormatedTodos(todos);
-                    textMessage = `Here are your task(s), ${userName}:<br/> ${todosResponse}<br/><br/>${messages.getWantDoTaskActions()}`
                     botSayInFestival({message:'Here are your tasks User'});
+                    textMessage = `Here are your task(s), ${userName}:<br/> ${todosResponse}<br/><br/>${messages.getWantDoTaskActions()}`
 
                 } else {
-                    textMessage = messages.getYouDontHaveTasks();
                     botSayInFestival({message:'There are no tasks in database'});
+                    textMessage = messages.getYouDontHaveTasks();
                 }
 
                 session.send(textMessage);
 
             } catch (e) {
                 console.error(e);
-                session.send(messages.getCannotGetItems());
                 botSayInFestival({message: messages.getCannotGetItems()});
+                session.send(messages.getCannotGetItems());
             }
 
             session.endDialogWithResult();
@@ -171,16 +178,17 @@ function botCreate(connector) {
                     session.userData.todosForFinish = todos;
 
                     todosResponse = getNumberedTodos(todos);
+                    botSayInFestival({message: `Please choose an task number to mark as done and press 'Enter'`});
                     textMessage = `Please choose an task number to mark as done and press 'Enter'<br/>${todosResponse}`
                 } else {
                     textMessage = messages.getYouDontHaveTasks();
                 }
-                botSayInFestival({message: `Please choose an task number to mark as done and press 'Enter'`});
+
                 builder.Prompts.number(session, textMessage);
             } catch (err) {
                 console.error(err);
-                session.send(messages.getCannotGetItems());
                 botSayInFestival({message: messages.getCannotGetItems()});
+                session.send(messages.getCannotGetItems());
             }
         },
         async (session, results) => {
@@ -195,17 +203,17 @@ function botCreate(connector) {
                 //mark task as done in db
                 try {
                     let todos = await markAsDone(taskId);
-
-                    session.send(messages.getMarkedTaskDone(userName, taskName));
                     botSayInFestival({message: 'Super. Task has been marked as done'});
+                    session.send(messages.getMarkedTaskDone(userName, taskName));
+
                 } catch (err) {
                     console.error((err));
-                    session.send(messages.noItemFound);
                     botSayInFestival({message: messages.noItemFound});
+                    session.send(messages.noItemFound);
                 }
             } else {
-                session.send(messages.noItemFound);
                 botSayInFestival({message: messages.noItemFound});
+                session.send(messages.noItemFound);
             }
 
             session.endDialog();
@@ -227,17 +235,18 @@ function botCreate(connector) {
                     session.userData.todosForRemove = todos;
 
                     todosResponse = getNumberedTodos(todos);
+                    botSayInFestival({message: `Please choose an task number to remove and press 'Enter'`});
                     textMessage = `Please choose an task number to remove and press 'Enter'<br/>${todosResponse}`
                 } else {
                     textMessage = messages.getYouDontHaveTasks();
                 }
 
                 builder.Prompts.number(session, textMessage);
-                botSayInFestival({message: `Please choose an task number to remove and press 'Enter'`});
+
             } catch (err) {
                 console.error(err);
-                session.send(messages.getCannotGetItems());
                 botSayInFestival({message: messages.getCannotGetItems()});
+                session.send(messages.getCannotGetItems());
             }
         },
         async (session, results) => {
@@ -254,16 +263,17 @@ function botCreate(connector) {
                     let todos = await removeTask(taskId);
                     //const result = await db.collection('todos').update({'_id': mongojs.ObjectId(taskId)},{$set:{'isDone':true}});
 
-                    session.send(messages.getRemovedTask(userName, taskName));
                     botSayInFestival({message: 'Super. Task has been removed'});
+                    session.send(messages.getRemovedTask(userName, taskName));
                 } catch (err) {
                     console.error((err));
-                    session.send(messages.noItemFound);
                     botSayInFestival({message: messages.noItemFound});
+                    session.send(messages.noItemFound);
+
                 }
             } else {
-                session.send(messages.noItemFound);
                 botSayInFestival({message: messages.noItemFound});
+                session.send(messages.noItemFound);
             }
 
             session.endDialog();
@@ -284,10 +294,11 @@ function botCreate(connector) {
 
 function botSayInFestival(opts) {
     //format message
-    const message = opts.message.replace('.', ' ');
+    const regExp = /./gi;
+    const message = opts.message;
 
     if(opts.callback){
-        say.speak(message, null, null, (err) => {
+        say.speak(message, 'voice_ked_diphone', null, (err) => {
             if(err) {
                 return console.log(err);
             }
