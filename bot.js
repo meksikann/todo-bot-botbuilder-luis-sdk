@@ -113,7 +113,7 @@ function botCreate(connector) {
             } else {
                 session.send(messages.getNoProblem());
                 botSayInFestival({
-                    message: messages.getNoProblem(), callback: ()=> {
+                    message: messages.getNoProblem(),expectingInput: true, session: session, callback: ()=> {
                         session.endDialog();
                     }
                 });
@@ -151,7 +151,7 @@ function botCreate(connector) {
 
             } catch (e) {
                 console.error(e);
-                botSayInFestival({message: messages.getCannotGetItems()});
+                botSayInFestival({message: messages.getCannotGetItems(), expectingInput: true, session: session});
                 session.send(messages.getCannotGetItems());
             }
 
