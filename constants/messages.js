@@ -56,7 +56,9 @@ let messages = {
     ******************************* string constants **************************
      **************************************************************************/
     noItemFound: 'No item found',
-    cancelConversation: "Canceling our conversation. Bye, bye.. :)"
+    cancelConversation: "Canceling our conversation. Bye, bye.. :)",
+    radioOn: 'Ok my friend, will turn on radio right now',
+    failedRadioOn: 'Failed to turn on the radio.'
 };
 
 

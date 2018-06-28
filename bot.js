@@ -1,5 +1,6 @@
 global.builder = require('botbuilder');
-const say = require('say')
+const say = require('say');
+const axios = require('axios');
 
 import {getFormatedTodos, getNumberedTodos} from './helpers/format-messages';
 import {messages} from './constants/messages';
@@ -9,6 +10,7 @@ import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks} from './he
 
 const regexpYes = /^yes$/i;
 const regexpNo = /^no$/i;
+const radioOnLambdaUrl ='https://ty2dmvacnb.execute-api.us-east-1.amazonaws.com/dev/';
 
 function botCreate(connector) {
     let inMemoryStorage = new builder.MemoryBotStorage();
@@ -285,6 +287,21 @@ function botCreate(connector) {
         }
     ).triggerAction({
             matches: intents.cancelConversation
+        });
+
+    bot.dialog(intents.radioOn, (session) => {
+            axios.get(radioOnLambdaUrl)
+                .then(function (response) {
+                    session.endConversation(messages.radioOn);
+                    botSayInFestival({message: messages.radioOn, expectingInput: false, session: session});
+                })
+                .catch(function (error) {
+                    session.endConversation(messages.failedRadioOn);
+                    botSayInFestival({message: messages.failedRadioOn, expectingInput: false, session: session});
+                });
+        }
+    ).triggerAction({
+            matches: intents.radioOn
         })
 }
 

@@ -24,6 +24,9 @@
       "name": "None"
     },
     {
+      "name": "radioOn"
+    },
+    {
       "name": "RemoveTask"
     }
   ],
@@ -438,6 +441,21 @@
       "entities": []
     },
     {
+      "text": "play some music",
+      "intent": "radioOn",
+      "entities": []
+    },
+    {
+      "text": "please turn the radion on",
+      "intent": "radioOn",
+      "entities": []
+    },
+    {
+      "text": "radion on",
+      "intent": "radioOn",
+      "entities": []
+    },
+    {
       "text": "remove",
       "intent": "RemoveTask",
       "entities": []
@@ -493,6 +511,11 @@
       "entities": []
     },
     {
+      "text": "swithch the radio on",
+      "intent": "radioOn",
+      "entities": []
+    },
+    {
       "text": "take it out",
       "intent": "RemoveTask",
       "entities": []
@@ -500,6 +523,11 @@
     {
       "text": "task list",
       "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "turn on radio",
+      "intent": "radioOn",
       "entities": []
     },
     {
