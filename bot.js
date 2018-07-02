@@ -45,17 +45,6 @@ function botCreate(connector) {
         botSayInFestival({message: 'Hey dude.  How can I help you?', expectingInput: true, session: session});
         session.send(
             messages.getBotGreetingMessage(userName));
-        //session.endDialog();
-
-        //session.say('Please hold while I calculate a response.',
-        //    'Please hold while I calculate a response.',
-        //    { inputHint: builder.InputHint.ignoringInput }
-        //);
-
-        //var msg = new builder.Message(session)
-        //    .speak('This is the text that will be spoken.')
-        //    .inputHint(builder.InputHint.acceptingInput);
-        //session.send(msg).endDialog();
     })
         .triggerAction({
             matches: intents.Greeting
@@ -66,12 +55,9 @@ function botCreate(connector) {
     bot.dialog(intents.askForTaskName, [
         (session, args, next) => {
 
-            //TODO: entity not shown here. maybe need more learning......
-            console.log('args----------------------->', args);
             if (args) {
                 let intent = args.intent;
                 let entity = builder.EntityRecognizer.findEntity(intent.entities, 'taskName');
-                console.log('found entity------------------------------->', entity);
 
                 if (entity && entity.type == entities.taskName) {
                     next({response: entity.entity})
@@ -289,6 +275,7 @@ function botCreate(connector) {
             matches: intents.cancelConversation
         });
 
+    //dialog to turn on radio **************************************************
     bot.dialog(intents.radioOn, (session) => {
             axios.get(radioOnLambdaUrl)
                 .then(function (response) {
@@ -296,6 +283,7 @@ function botCreate(connector) {
                     botSayInFestival({message: messages.radioOn, expectingInput: false, session: session});
                 })
                 .catch(function (error) {
+                    console.error(error);
                     session.endConversation(messages.failedRadioOn);
                     botSayInFestival({message: messages.failedRadioOn, expectingInput: false, session: session});
                 });
@@ -313,15 +301,13 @@ function botSayInFestival(opts) {
     const voices = [
         'voice_don_diphone',
         'voice_ked_diphone',
-        'voice_reset',
         'voice_kal_diphone',
-        'voice_rab_diphone',
-        'Alex'
+        'voice_rab_diphone'
     ];
 
 
     if (opts.callback) {
-        say.speak(message, voices[4], null, (err) => {
+        say.speak(message, voices[1], null, (err) => {
             if (err) {
                 return console.log(err);
             }
