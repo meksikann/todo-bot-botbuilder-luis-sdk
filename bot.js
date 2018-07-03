@@ -25,6 +25,10 @@ function botCreate(connector) {
 
     bot.recognizer(recognizer);
 
+    /**********************************************************************
+     * ******************** dialogs ***************************************
+     * ********************************************************************/
+
     //None intent dialog **************************************************
     bot.dialog(intents.None, function (session) {
         const userName = session.message.user.name;
@@ -367,6 +371,10 @@ function botCreate(connector) {
     ).triggerAction({
             matches: intents.removeAllTasks
         })
+
+    /**********************************************************************
+     * ******************** end dialogs ***************************************
+     * ********************************************************************/
 }
 
 export {botCreate};
