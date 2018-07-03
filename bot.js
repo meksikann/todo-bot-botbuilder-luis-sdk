@@ -1,5 +1,5 @@
 global.builder = require('botbuilder');
-
+require('dotenv').config();
 const axios = require('axios');
 
 import {getFormatedTodos, getNumberedTodos} from './helpers/format-messages';
@@ -11,7 +11,7 @@ import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllT
 
 const regexpYes = /^yes$/i;
 const regexpNo = /^no$/i;
-const radioOnLambdaUrl = 'https://ty2dmvacnb.execute-api.us-east-1.amazonaws.com/dev/';
+const radioOnLambdaUrl = process.env.LAMBDA_RADIO_ON;
 
 function botCreate(connector) {
     let inMemoryStorage = new builder.MemoryBotStorage();
