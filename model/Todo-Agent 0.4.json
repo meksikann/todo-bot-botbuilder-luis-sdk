@@ -27,6 +27,9 @@
       "name": "radioOn"
     },
     {
+      "name": "removeAllTasks"
+    },
+    {
       "name": "RemoveTask"
     }
   ],
@@ -114,6 +117,11 @@
     {
       "text": "bla bla",
       "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "can you delete all tasks",
+      "intent": "removeAllTasks",
       "entities": []
     },
     {
@@ -396,6 +404,11 @@
       "entities": []
     },
     {
+      "text": "i want you to remove everything",
+      "intent": "removeAllTasks",
+      "entities": []
+    },
+    {
       "text": "i write stupid stuff",
       "intent": "None",
       "entities": []
@@ -461,6 +474,21 @@
       "entities": []
     },
     {
+      "text": "remove all",
+      "intent": "removeAllTasks",
+      "entities": []
+    },
+    {
+      "text": "remove all tasks",
+      "intent": "removeAllTasks",
+      "entities": []
+    },
+    {
+      "text": "remove everything",
+      "intent": "removeAllTasks",
+      "entities": []
+    },
+    {
       "text": "remove from list",
       "intent": "RemoveTask",
       "entities": []
@@ -523,6 +551,11 @@
     {
       "text": "task list",
       "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "total remove",
+      "intent": "removeAllTasks",
       "entities": []
     },
     {

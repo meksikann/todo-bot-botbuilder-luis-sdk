@@ -31,7 +31,6 @@ async function removeTask(taskId) {
     } catch (err) {
         throw err;
     }
-
 }
 
 async function getAllTasks(userId) {
@@ -58,4 +57,16 @@ async function getActiveTasks(userId) {
     }
 }
 
-export {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks}
+async function removeAllTasks (userId) {
+    try {
+        const findQuery = {'userId': userId};
+
+        const result = await db.collection('todos').update(findQuery, {$set: {'isRemoved': true}},{multi: true});
+
+        return result;
+    } catch (err) {
+        throw err;
+    }
+}
+
+export {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllTasks}

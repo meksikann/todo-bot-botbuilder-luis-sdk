@@ -9,7 +9,8 @@ const intents = {
     'FinishTask': null,
     'RemoveTask': null,
     'cancelConversation': null,
-    'radioOn': null
+    'radioOn': null,
+    'removeAllTasks': null
 };
 
 export default keyMirror(intents);

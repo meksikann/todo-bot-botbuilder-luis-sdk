@@ -58,7 +58,10 @@ let messages = {
     noItemFound: 'No item found',
     cancelConversation: "Canceling our conversation. Bye, bye.. :)",
     radioOn: 'Ok my friend, will turn on radio right now',
-    failedRadioOn: 'Failed to turn on the radio.'
+    failedRadioOn: 'Failed to turn on the radio.',
+    sureToRemoveAll: 'Are you really sure you want to remove all your tasks?',
+    allTasksRemoved: 'ok, I have just removed all  your tasks',
+    shitSomethingWrong: 'Shit , something went wrong!'
 };
 
 
