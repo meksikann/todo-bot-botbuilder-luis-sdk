@@ -42,12 +42,12 @@ function botCreate(connector) {
     bot.dialog(intents.Greeting, function (session) {
         const userName = session.message.user.name;
 
-        botSayInFestival({message: 'Hey dude.  How can I help you?',
+        botSayInFestival({message: 'Hey how can I help you?',
             expectingInput: true,
             session: session,
             callback: () => {
-                session.send(
-                    messages.getBotGreetingMessage(userName));
+                //session.send(
+                //    messages.getBotGreetingMessage(userName));
             }
         });
 
@@ -369,12 +369,6 @@ function botSayInFestival(opts) {
             if (err) {
                 return console.log(err);
             }
-            if(opts.expectingInput && session) {
-                let msg = new builder.Message(session)
-                    .speak(message)
-                    .inputHint(builder.InputHint.expectingInput);
-                session.send(msg)
-            }
 
             opts.callback();
         });
@@ -383,15 +377,14 @@ function botSayInFestival(opts) {
             if(err) {
                 return console.error(err);
             }
-            if(opts.expectingInput && session) {
-                let msg = new builder.Message(session)
-                    .speak(message)
-                    .inputHint(builder.InputHint.expectingInput);
-                session.send(msg)
-            }
         });
     }
 
-
+    if(opts.expectingInput && session) {
+        let msg = new builder.Message(session)
+            .speak(message)
+            .inputHint(builder.InputHint.expectingInput);
+        session.send(msg)
+    }
 }
 export {botCreate};
