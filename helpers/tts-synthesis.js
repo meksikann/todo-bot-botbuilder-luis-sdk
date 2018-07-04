@@ -10,28 +10,40 @@ function botSayInFestival(opts) {
         'voice_rab_diphone'
     ];
 
+    console.log('enable speech: ', process.env.ENABLE_SPEECH);
 
-    if (opts.callback) {
-        say.speak(message, voices[1], null, (err) => {
-            if (err) {
-                return console.log(err);
-            }
+    // use speech synthesis if enabled ********************************
+    if(process.env.ENABLE_SPEECH == 1) {
+        if (opts.callback) {
+            say.speak(message, voices[1], null, (err) => {
+                if (err) {
+                    return console.log(err);
+                }
 
-            opts.callback();
-        });
-    } else {
-        say.speak(message, voices[1], null, (err) => {
-            if(err) {
-                return console.error(err);
-            }
-        });
+                opts.callback();
+            });
+        } else {
+            say.speak(message, voices[1], null, (err) => {
+                if(err) {
+                    return console.error(err);
+                }
+            });
+        }
+
+        if(opts.expectingInput && session) {
+            let msg = new builder.Message(session)
+                .speak(message)
+                .inputHint(builder.InputHint.expectingInput);
+            session.send(msg)
+        }
+
+        return;
     }
 
-    if(opts.expectingInput && session) {
-        let msg = new builder.Message(session)
-            .speak(message)
-            .inputHint(builder.InputHint.expectingInput);
-        session.send(msg)
+
+    // if speech synthesis not enabled just run the callback
+    if (opts.callback) {
+        opts.callback();
     }
 }
 

@@ -6,13 +6,7 @@ let messages = {
     * ****************************** get methods *******************************************
     * **************************************************************************************/
     getBotGreetingMessage: (userName) => {
-        return `Hi, ${userName}.
-        Let me show you what I can do -
-        here are intents you can use:<br/>
-        "add task" to create new task :)<br/>
-        "show tasks" to get you task list.<br/>
-        Btw, I also learn how to remove and mark task as done:).
-        Have a nice journey!!!`;
+        return `Hi, ${userName}. How can I help you?`;
     },
     getWhatNewTaskName: () => {
         return 'What is new task name?'
@@ -61,7 +55,8 @@ let messages = {
     failedRadioOn: 'Failed to turn on the radio.',
     sureToRemoveAll: 'Are you really sure you want to remove all your tasks?',
     allTasksRemoved: 'ok, I have just removed all  your tasks',
-    shitSomethingWrong: 'Shit , something went wrong!'
+    shitSomethingWrong: 'Shit , something went wrong!',
+    askName: 'Hi! What is your name?'
 };
 
 

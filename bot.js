@@ -16,8 +16,11 @@ const radioOnLambdaUrl = process.env.LAMBDA_RADIO_ON;
 function botCreate(connector) {
     let inMemoryStorage = new builder.MemoryBotStorage();
 
-    let bot = new builder.UniversalBot(connector
-    ).set('storage', inMemoryStorage);
+    let bot = new builder.UniversalBot(connector,[
+        function (session) {
+           session.send('default dialog goes here...')
+        }
+    ]).set('storage', inMemoryStorage);
 
 
     //connect to LUIS
@@ -29,9 +32,9 @@ function botCreate(connector) {
      * ******************** dialogs ***************************************
      * ********************************************************************/
 
-    //None intent dialog **************************************************
+        //None intent dialog **************************************************
     bot.dialog(intents.None, function (session) {
-        const userName = session.message.user.name;
+        const userName = session.userData.userName;
 
         botSayInFestival({message: "I don't follow you! What you say?", expectingInput: true, session: session});
 
@@ -44,20 +47,24 @@ function botCreate(connector) {
         });
 
     //greeting dialog ****************************************************
-    bot.dialog(intents.Greeting, function (session) {
-        const userName = session.message.user.name;
+    bot.dialog(intents.Greeting, [
+        (session, args, next) => {
+            session.userData.userName ? next() : builder.Prompts.text(session, messages.askName);
+        },
+        (session, results) => {
+            const userName = results.response ? (session.userData.userName = results.response, results.response) : session.userData.userName;
 
-        botSayInFestival({
-            message: 'Hey how can I help you?',
-            expectingInput: true,
-            session: session,
-            callback: () => {
-                //session.send(
-                //    messages.getBotGreetingMessage(userName));
-            }
-        });
-
-    })
+            botSayInFestival({
+                message: `Hey how can I help you, ${userName}?`,
+                expectingInput: true,
+                session: session,
+                callback: () => {
+                    session.send(
+                        messages.getBotGreetingMessage(userName));
+                    session.endDialog();
+                }
+            });
+        }])
         .triggerAction({
             matches: intents.Greeting
         });
@@ -116,7 +123,7 @@ function botCreate(connector) {
             }
         },
         (session) => {
-            const userName = session.message.user.name;
+            const userName = session.userData.userName;
             botSayInFestival({message: 'Wanna add more tasks?', expectingInput: true, session: session});
             builder.Prompts.confirm(session, messages.getWantAddMore(userName));
         },
@@ -140,7 +147,7 @@ function botCreate(connector) {
 //dialog to get tasks ***************************************************************
     bot.dialog(intents.GetTasks, [
         async (session) => {
-            const userName = session.message.user.name;
+            const userName = session.userData.userName;
             let todosResponse = '';
             let textMessage;
             let voiceMessage = '';
@@ -205,7 +212,7 @@ function botCreate(connector) {
             }
         },
         async (session, results) => {
-            const userName = session.message.user.name;
+            const userName = session.userData.userName;
             const todos = session.userData.todosForFinish;
             const taskNumber = results.response;
 
@@ -233,7 +240,7 @@ function botCreate(connector) {
                 session.send(messages.noItemFound);
             }
 
-            //session.endDialog();
+            session.endDialog();
         }
     ]).triggerAction({
         matches: intents.FinishTask
@@ -253,7 +260,7 @@ function botCreate(connector) {
 
                     todosResponse = getNumberedTodos(todos);
                     botSayInFestival({
-                        message: `Please choose an task number to remove and press 'Enter'`,
+                        message: `Please choose an task number to remove.'`,
                         expectingInput: true,
                         session: session
                     });
@@ -271,7 +278,7 @@ function botCreate(connector) {
             }
         },
         async (session, results) => {
-            const userName = session.message.user.name;
+            const userName = session.userData.userName;
             const todos = session.userData.todosForRemove;
             const taskNumber = results.response;
 
@@ -297,7 +304,7 @@ function botCreate(connector) {
                 session.send(messages.noItemFound);
             }
 
-            //session.endDialog();
+            session.endDialog();
         }
     ]).triggerAction({
         matches: intents.RemoveTask
@@ -370,7 +377,7 @@ function botCreate(connector) {
         ]
     ).triggerAction({
             matches: intents.removeAllTasks
-        })
+        });
 
     /**********************************************************************
      * ******************** end dialogs ***************************************
