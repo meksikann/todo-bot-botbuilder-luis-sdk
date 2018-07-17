@@ -4,12 +4,15 @@ const axios = require('axios');
 
 import {getFormatedTodos, getNumberedTodos} from './helpers/format-messages';
 import {botSayInFestival} from './helpers/tts-synthesis';
-import {getUserContextInfo} from './helpers/userContext';
+import {getUserContextInfo, setUserContextInfo} from './helpers/userContext';
 import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllTasks} from './helpers/database-queries';
 import {messages} from './constants/messages';
 import intents from './constants/intents';
 import {entities} from './constants/entities';
 import generalConstants from './constants/general';
+
+// brain import ****************
+import {analyseUserContext} from './brain-nodes/index';
 
 
 const radioOnLambdaUrl = process.env.LAMBDA_RADIO_ON;
@@ -50,6 +53,14 @@ function botCreate(connector) {
     //greeting dialog ****************************************************
     bot.dialog(intents.Greeting, [
         (session, args, next) => {
+            console.log('greet', session.message.user.id)
+            const setOpts = {
+                userId: session.message.user.id,
+                lastUserIntent: intents.Greeting
+            };
+
+            setUserContextInfo(setOpts);
+
             session.userData.userName ? next() : botSayInFestival({
                 message: messages.askName,
                 expectingInput: true,
@@ -159,6 +170,12 @@ function botCreate(connector) {
             let todosResponse = '';
             let textMessage;
             let voiceMessage = '';
+            const setOpts = {
+                userId: session.message.user.id,
+                lastUserIntent: intents.GetTasks
+            };
+
+            setUserContextInfo(setOpts);
 
             try {
                 let todos = await getAllTasks(session.message.user.id);
@@ -195,6 +212,13 @@ function botCreate(connector) {
             let todosResponse = [];
             let textMessage;
             let userId = session.message.user.id;
+            const setOpts = {
+                userId: session.message.user.id,
+                lastUserIntent: intents.FinishTask
+            };
+
+            setUserContextInfo(setOpts);
+
             try {
                 let todos = await getActiveTasks(userId);
 
@@ -257,6 +281,13 @@ function botCreate(connector) {
     //Dialog to remove task **********************************************************
     bot.dialog(intents.RemoveTask, [
         async (session) => {
+            const setOpts = {
+                userId: session.message.user.id,
+                lastUserIntent: intents.RemoveTask
+            };
+
+            setUserContextInfo(setOpts);
+
             let todosResponse = [];
             let textMessage;
             let userId = session.message.user.id;
@@ -320,8 +351,22 @@ function botCreate(connector) {
 
     //dialog to cancel conversation **************************************************
     bot.dialog(intents.cancelConversation, (session) => {
+
+
             session.endConversation(messages.cancelConversation);
-            botSayInFestival({message: messages.cancelConversation, expectingInput: true, session: session});
+            botSayInFestival({
+                message: messages.cancelConversation,
+                expectingInput: true,
+                session: session,
+                callback: ()=>{
+                    const setOpts = {
+                        userId: session.message.user.id,
+                        lastUserIntent: intents.cancelConversation
+                    };
+
+                    setUserContextInfo(setOpts);
+                }
+            });
         }
     ).triggerAction({
             matches: intents.cancelConversation
@@ -329,10 +374,23 @@ function botCreate(connector) {
 
     //dialog to turn on radio **************************************************
     bot.dialog(intents.radioOn, (session) => {
+
             axios.get(radioOnLambdaUrl)
                 .then(function (response) {
                     session.endConversation(messages.radioOn);
-                    botSayInFestival({message: messages.radioOn, expectingInput: false, session: session});
+                    botSayInFestival({
+                        message: messages.radioOn,
+                        expectingInput: false,
+                        session: session,
+                        callback: ()=> {
+                            const setOpts = {
+                                userId: session.message.user.id,
+                                lastUserIntent: intents.radioOn
+                            };
+
+                            setUserContextInfo(setOpts);
+                        }
+                    });
                 })
                 .catch(function (error) {
                     console.error(error);
@@ -346,7 +404,18 @@ function botCreate(connector) {
 
     bot.dialog(intents.removeAllTasks, [
             (session) => {
-                botSayInFestival({message: messages.sureToRemoveAll, expectingInput: true, session: session});
+                botSayInFestival({
+                    message: messages.sureToRemoveAll,
+                    expectingInput: true,
+                    session: session,
+                    callback: ()=> {
+                        const setOpts = {
+                            userId: session.message.user.id,
+                            lastUserIntent: intents.removeAllTasks
+                        };
+                        setUserContextInfo(setOpts);
+                    }
+                });
                 builder.Prompts.confirm(session, messages.sureToRemoveAll);
             },
             async (session, results) => {
@@ -394,8 +463,14 @@ function botCreate(connector) {
                 expectingInput: true,
                 session: session,
                 callback: () => {
+                    const setOpts = {
+                        userId: session.message.user.id,
+                        lastUserIntent: intents.whatCanBotDo
+                    };
+
                     session.send(messages.botCanDoNextStuff);
                     session.endDialog();
+                    setUserContextInfo(setOpts);
                 }
             });
         }
@@ -410,8 +485,14 @@ function botCreate(connector) {
                 expectingInput: true,
                 session: session,
                 callback: () => {
+                    const setOpts = {
+                        userId: session.message.user.id,
+                        lastUserIntent: intents.appreciation
+                    };
+
                     session.send(messages.appreciationResponse);
                     session.endDialog();
+                    setUserContextInfo(setOpts);
                 }
             });
         }
@@ -422,18 +503,25 @@ function botCreate(connector) {
     //dialog response for farewell **************************************************
     bot.dialog(intents.farewell, async (session) => {
             let botReplyMessage = '';
+            let userContext = await getUserContextInfo(session.message.user.id);
             const opts = {
-                userId: session.message.user.id,
-                request: generalConstants.userContext.lastAction
+                type:intents.farewell,
+                context: userContext
             };
-            let userContext = await getUserContextInfo(opts);
-            console.log('got user context ',userContext);
 
-            if(!userContext.hasContext) {
-                botReplyMessage = messages.farewellResponse;
-            } else {
-                //TODO: use user context in dialogs ================================
+            //TODO: MAKE A USER CONTEXT ANALYZER: use user context in dialogs ================================
+            let analysisResult  = await analyseUserContext(opts);
 
+            //todo: move to separate method
+            switch (analysisResult.data) {
+                case generalConstants.userAnalysisResult.proceed:
+                    botReplyMessage = 'bye';
+                    break;
+                case generalConstants.userAnalysisResult.askedAlready:
+                    botReplyMessage = 'well, bye again';
+                    break;
+                default :
+                    botReplyMessage = 'bye';
             }
 
             botSayInFestival({
@@ -441,8 +529,15 @@ function botCreate(connector) {
                 expectingInput: false,
                 session: session,
                 callback: () => {
+                    const setOpts = {
+                        userId: session.message.user.id,
+                        lastUserIntent: intents.farewell
+                    };
+
                     session.send(botReplyMessage);
                     session.endDialog();
+                    //save use context
+                    setUserContextInfo(setOpts);
                 }
             });
         }

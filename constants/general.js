@@ -2,7 +2,11 @@ let keyMirror = require('keymirror');
 
 const generalConstants = {
     userContext: keyMirror({
-        'lastAction': null
+        'lastUserIntent': null
+    }),
+    userAnalysisResult: keyMirror({
+        'askedAlready': null,
+        'proceed': null
     })
 };
 

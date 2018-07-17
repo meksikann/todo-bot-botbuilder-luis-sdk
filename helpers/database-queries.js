@@ -79,4 +79,14 @@ async function getUserContext (userId) {
     }
 }
 
-export {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllTasks, getUserContext}
+async function setUserContext(userId, setQuery) {
+    try {
+        const result = await db.collection('userContext').update({userId: userId}, setQuery, { upsert: true});
+
+        return result;
+    } catch (err) {
+        throw err;
+    }
+}
+
+export {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllTasks, getUserContext, setUserContext}

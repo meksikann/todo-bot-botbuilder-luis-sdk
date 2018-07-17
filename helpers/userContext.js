@@ -1,33 +1,27 @@
-import {getUserContext} from './database-queries';
+import {getUserContext, setUserContext} from './database-queries';
 import generalConstants from '../constants/general';
 
-async function getUserContextInfo(opts) {
-    const {userId, request} = opts;
-    let contextInfo = {
-        payload: '',
-        type: null,
-        hasContext: false
-    };
-
+async function getUserContextInfo(userId) {
     try {
-        let context = await getUserContext(userId);
-        if(request) {
-            switch (context) {
-                case generalConstants.userContext.lastAction:
-                    contextInfo = context.lastAction;
-
-                    contextInfo.hasContext = true;
-                    break;
-                default :
-                    contextInfo.hasContext = false;
-            }
-        }
-
-        return contextInfo;
+        return await getUserContext(userId);
     } catch(err) {
         console.error(err);
     }
 }
 
+async function setUserContextInfo(opts) {
+    const {userId, lastUserIntent} = opts;
+    let contextToSave = {
+        lastUserIntent,
+        userId
+    };
 
-export {getUserContextInfo}
+    try {
+        return await setUserContext(userId, contextToSave);
+    } catch(err) {
+        return console.error(err);
+    }
+}
+
+
+export {getUserContextInfo, setUserContextInfo}
