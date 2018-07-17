@@ -31,12 +31,17 @@
     },
     {
       "name": "RemoveTask"
+    },
+    {
+      "name": "whatCanBotDo"
     }
   ],
   "entities": [
     {
       "name": "taskName",
-      "roles": []
+      "roles": [
+        "Iamlookingwheretotestnextstuff"
+      ]
     }
   ],
   "composites": [],
@@ -74,6 +79,11 @@
     {
       "text": "5",
       "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "add item",
+      "intent": "AddTask",
       "entities": []
     },
     {
@@ -130,12 +140,22 @@
       "entities": []
     },
     {
+      "text": "cancel this f****** conversation",
+      "intent": "cancelConversation",
+      "entities": []
+    },
+    {
       "text": "check if db collection creates",
       "intent": "None",
       "entities": []
     },
     {
       "text": "check removal state",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "create alarm",
       "intent": "None",
       "entities": []
     },
@@ -349,6 +369,11 @@
       ]
     },
     {
+      "text": "deded",
+      "intent": "None",
+      "entities": []
+    },
+    {
       "text": "delete it",
       "intent": "RemoveTask",
       "entities": []
@@ -380,6 +405,11 @@
     },
     {
       "text": "hello",
+      "intent": "Greeting",
+      "entities": []
+    },
+    {
+      "text": "hey",
       "intent": "Greeting",
       "entities": []
     },
@@ -459,6 +489,11 @@
       "entities": []
     },
     {
+      "text": "please provide a task",
+      "intent": "None",
+      "entities": []
+    },
+    {
       "text": "please turn the radion on",
       "intent": "radioOn",
       "entities": []
@@ -514,6 +549,16 @@
       "entities": []
     },
     {
+      "text": "show me what can you do",
+      "intent": "whatCanBotDo",
+      "entities": []
+    },
+    {
+      "text": "show my list",
+      "intent": "GetTasks",
+      "entities": []
+    },
+    {
       "text": "show my my stuff",
       "intent": "GetTasks",
       "entities": []
@@ -539,6 +584,11 @@
       "entities": []
     },
     {
+      "text": "sure i want to add",
+      "intent": "AddTask",
+      "entities": []
+    },
+    {
       "text": "swithch the radio on",
       "intent": "radioOn",
       "entities": []
@@ -551,6 +601,11 @@
     {
       "text": "task list",
       "intent": "GetTasks",
+      "entities": []
+    },
+    {
+      "text": "tell me please what are you able to do",
+      "intent": "whatCanBotDo",
       "entities": []
     },
     {
@@ -569,6 +624,11 @@
       "entities": []
     },
     {
+      "text": "what are you able do",
+      "intent": "whatCanBotDo",
+      "entities": []
+    },
+    {
       "text": "what is my tasks",
       "intent": "GetTasks",
       "entities": []
@@ -584,12 +644,27 @@
       "entities": []
     },
     {
+      "text": "what you can do?",
+      "intent": "whatCanBotDo",
+      "entities": []
+    },
+    {
+      "text": "what you can?",
+      "intent": "whatCanBotDo",
+      "entities": []
+    },
+    {
       "text": "what's my stuff",
       "intent": "GetTasks",
       "entities": []
     },
     {
       "text": "where do you live?",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "why what does the fox other branch doesn't work?",
       "intent": "None",
       "entities": []
     },

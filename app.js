@@ -19,6 +19,8 @@ let connector = new builder.ChatConnector({
     appId: process.env.MicrosoftAppId,
     appPassword: process.env.MicrosoftAppPassword
 });
+
+// connector usage in bot creation method
 botCreate(connector);
 
 server.post('/api/messages', connector.listen());

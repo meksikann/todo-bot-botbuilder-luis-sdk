@@ -56,7 +56,10 @@ let messages = {
     sureToRemoveAll: 'Are you really sure you want to remove all your tasks?',
     allTasksRemoved: 'ok, I have just removed all  your tasks',
     shitSomethingWrong: 'Shit , something went wrong!',
-    askName: 'Hi! What is your name?'
+    askName: 'Hi! What is your name?',
+    botCanDoNextStuff: 'I can show your tasks, add few, remove or set as done.',
+    appreciationResponse: 'glad to help you',
+    farewellResponse: 'bye'
 };
 
 

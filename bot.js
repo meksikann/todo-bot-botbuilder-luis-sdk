@@ -4,21 +4,22 @@ const axios = require('axios');
 
 import {getFormatedTodos, getNumberedTodos} from './helpers/format-messages';
 import {botSayInFestival} from './helpers/tts-synthesis';
+import {getUserContextInfo} from './helpers/userContext';
+import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllTasks} from './helpers/database-queries';
 import {messages} from './constants/messages';
 import intents from './constants/intents';
 import {entities} from './constants/entities';
-import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllTasks} from './helpers/database-queries';
+import generalConstants from './constants/general';
 
-const regexpYes = /^yes$/i;
-const regexpNo = /^no$/i;
+
 const radioOnLambdaUrl = process.env.LAMBDA_RADIO_ON;
 
 function botCreate(connector) {
     let inMemoryStorage = new builder.MemoryBotStorage();
 
-    let bot = new builder.UniversalBot(connector,[
+    let bot = new builder.UniversalBot(connector, [
         function (session) {
-           session.send('default dialog goes here...')
+            session.send('default dialog goes here...')
         }
     ]).set('storage', inMemoryStorage);
 
@@ -49,7 +50,14 @@ function botCreate(connector) {
     //greeting dialog ****************************************************
     bot.dialog(intents.Greeting, [
         (session, args, next) => {
-            session.userData.userName ? next() : builder.Prompts.text(session, messages.askName);
+            session.userData.userName ? next() : botSayInFestival({
+                message: messages.askName,
+                expectingInput: true,
+                session: session,
+                callback: () => {
+                    builder.Prompts.text(session, messages.askName);
+                }
+            });
         },
         (session, results) => {
             const userName = results.response ? (session.userData.userName = results.response, results.response) : session.userData.userName;
@@ -377,6 +385,69 @@ function botCreate(connector) {
         ]
     ).triggerAction({
             matches: intents.removeAllTasks
+        });
+
+    //dialog show what bot can do **************************************************
+    bot.dialog(intents.whatCanBotDo, (session) => {
+            botSayInFestival({
+                message: messages.botCanDoNextStuff,
+                expectingInput: true,
+                session: session,
+                callback: () => {
+                    session.send(messages.botCanDoNextStuff);
+                    session.endDialog();
+                }
+            });
+        }
+    ).triggerAction({
+            matches: intents.whatCanBotDo
+        });
+
+    //dialog response for thank you **************************************************
+    bot.dialog(intents.appreciation, (session) => {
+            botSayInFestival({
+                message: messages.appreciationResponse,
+                expectingInput: true,
+                session: session,
+                callback: () => {
+                    session.send(messages.appreciationResponse);
+                    session.endDialog();
+                }
+            });
+        }
+    ).triggerAction({
+            matches: intents.appreciation
+        });
+
+    //dialog response for farewell **************************************************
+    bot.dialog(intents.farewell, async (session) => {
+            let botReplyMessage = '';
+            const opts = {
+                userId: session.message.user.id,
+                request: generalConstants.userContext.lastAction
+            };
+            let userContext = await getUserContextInfo(opts);
+            console.log('got user context ',userContext);
+
+            if(!userContext.hasContext) {
+                botReplyMessage = messages.farewellResponse;
+            } else {
+                //TODO: use user context in dialogs ================================
+
+            }
+
+            botSayInFestival({
+                message: botReplyMessage,
+                expectingInput: false,
+                session: session,
+                callback: () => {
+                    session.send(botReplyMessage);
+                    session.endDialog();
+                }
+            });
+        }
+    ).triggerAction({
+            matches: intents.farewell
         });
 
     /**********************************************************************

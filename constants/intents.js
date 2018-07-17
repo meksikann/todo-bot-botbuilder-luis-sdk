@@ -10,7 +10,10 @@ const intents = {
     'RemoveTask': null,
     'cancelConversation': null,
     'radioOn': null,
-    'removeAllTasks': null
+    'removeAllTasks': null,
+    'whatCanBotDo':null,
+    'appreciation': null,
+    'farewell': null
 };
 
 export default keyMirror(intents);

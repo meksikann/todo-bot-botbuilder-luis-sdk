@@ -69,4 +69,14 @@ async function removeAllTasks (userId) {
     }
 }
 
-export {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllTasks}
+async function getUserContext (userId) {
+    try {
+        const result = await db.collection('userContext').findOne({userId: userId});
+
+        return result;
+    } catch (err) {
+        throw err;
+    }
+}
+
+export {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllTasks, getUserContext}
