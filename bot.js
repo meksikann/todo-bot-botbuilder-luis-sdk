@@ -7,7 +7,7 @@ import {botSayInFestival} from './helpers/tts-synthesis';
 import {getUserContextInfo, setUserContextInfo} from './helpers/userContext';
 import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllTasks} from './helpers/database-queries';
 import {messages} from './constants/messages';
-import intents from './constants/intents';
+import intentsConstants from './constants/intents';
 import {entities} from './constants/entities';
 import generalConstants from './constants/general';
 
@@ -20,24 +20,71 @@ const radioOnLambdaUrl = process.env.LAMBDA_RADIO_ON;
 function botCreate(connector) {
     let inMemoryStorage = new builder.MemoryBotStorage();
 
-    let bot = new builder.UniversalBot(connector, [
-        function (session) {
-            session.send('default dialog goes here...')
-        }
-    ]).set('storage', inMemoryStorage);
+    let bot = new builder.UniversalBot(connector).set('storage', inMemoryStorage);
 
-
-    //connect to LUIS
-    let recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL);
-
-    bot.recognizer(recognizer);
 
     /**********************************************************************
-     * ******************** dialogs ***************************************
+     * recognizer
+     * ********************************************************************/
+    let recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL)
+
+    .onFilter((context, result, callback) => {
+        console.log('context: ', context);
+        console.log('result: ', result);
+        //let userContext = await getUserContextInfo(session.message.user.id);
+        //const opts = {
+        //    type:intents.farewell,
+        //    context: userContext
+        //};
+        //
+        //let analysisResult  = await analyseUserContext(opts);
+        //
+        ////todo: move to separate method --------------------------------->
+        //switch (analysisResult.data) {
+        //    case generalConstants.userAnalysisResult.proceed:
+        //        botReplyMessage = 'bye';
+        //        break;
+        //    case generalConstants.userAnalysisResult.askedAlready:
+        //        botReplyMessage = 'well, bye again';
+        //        break;
+        //    default :
+        //        botReplyMessage = 'bye';
+        //}
+        callback(null, result);
+    });
+    //
+    //bot.recognizer(recognizer);
+
+    let intents = new builder.IntentDialog({intentThreshold: 0.8, recognizers:[recognizer]});
+
+    bot.dialog('/', intents);
+
+    //match intents with dialogs to trigger
+
+    intents.matches(intentsConstants.Greeting, intentsConstants.Greeting);
+    intents.matches(intentsConstants.AddTask, intentsConstants.AddTask);
+    intents.matches(intentsConstants.GetTasks, intentsConstants.GetTasks);
+    intents.matches(intentsConstants.FinishTask, intentsConstants.FinishTask);
+    intents.matches(intentsConstants.RemoveTask, intentsConstants.RemoveTask);
+    intents.matches(intentsConstants.cancelConversation, intentsConstants.cancelConversation);
+    intents.matches(intentsConstants.radioOn, intentsConstants.radioOn);
+    intents.matches(intentsConstants.removeAllTasks, intentsConstants.removeAllTasks);
+    intents.matches(intentsConstants.whatCanBotDo, intentsConstants.whatCanBotDo);
+    intents.matches(intentsConstants.appreciation, intentsConstants.appreciation);
+    intents.matches(intentsConstants.farewell, intentsConstants.farewell);
+
+    //if no intent recognized use default message
+    intents.onDefault((session, args)=>{
+        session.send('No intent recognized');
+        session.endDialog('Type some other utterance please');
+    });
+
+    /**********************************************************************
+     * dialogs
      * ********************************************************************/
 
-        //None intent dialog **************************************************
-    bot.dialog(intents.None, function (session) {
+    //None intent dialog **************************************************
+    bot.dialog(intentsConstants.None, function (session) {
         const userName = session.userData.userName;
 
         botSayInFestival({message: "I don't follow you! What you say?", expectingInput: true, session: session});
@@ -45,18 +92,15 @@ function botCreate(connector) {
         session.send(
             messages.getDontUnderstanYou(userName));
         session.endDialog();
-    })
-        .triggerAction({
-            matches: intents.None
-        });
+    });
 
     //greeting dialog ****************************************************
-    bot.dialog(intents.Greeting, [
+    bot.dialog(intentsConstants.Greeting, [
         (session, args, next) => {
             console.log('greet', session.message.user.id)
             const setOpts = {
                 userId: session.message.user.id,
-                lastUserIntent: intents.Greeting
+                lastUserIntent: intentsConstants.Greeting
             };
 
             setUserContextInfo(setOpts);
@@ -83,14 +127,11 @@ function botCreate(connector) {
                     session.endDialog();
                 }
             });
-        }])
-        .triggerAction({
-            matches: intents.Greeting
-        });
+        }]);
 
 
     //dialog to ask for a task name *****************************************
-    bot.dialog(intents.askForTaskName, [
+    bot.dialog(intentsConstants.AddTask, [
         (session, args, next) => {
 
             if (args) {
@@ -148,7 +189,7 @@ function botCreate(connector) {
         },
         (session, results) => {
             if (results.response) {
-                session.beginDialog(intents.askForTaskName);
+                session.beginDialog(intentsConstants.AddTask);
             } else {
                 session.send(messages.getNoProblem());
                 botSayInFestival({
@@ -158,13 +199,10 @@ function botCreate(connector) {
                 });
             }
         }
-    ]).triggerAction({
-        matches: intents.AddTask
-    });
+    ]);
 
-
-//dialog to get tasks ***************************************************************
-    bot.dialog(intents.GetTasks, [
+    //dialog to get tasks ***************************************************************
+    bot.dialog(intentsConstants.GetTasks, [
         async (session) => {
             const userName = session.userData.userName;
             let todosResponse = '';
@@ -172,7 +210,7 @@ function botCreate(connector) {
             let voiceMessage = '';
             const setOpts = {
                 userId: session.message.user.id,
-                lastUserIntent: intents.GetTasks
+                lastUserIntent: intentsConstants.GetTasks
             };
 
             setUserContextInfo(setOpts);
@@ -202,19 +240,18 @@ function botCreate(connector) {
 
             session.endDialog();
         }
-    ]).triggerAction({
-        matches: intents.GetTasks
-    });
+    ]);
 
-//dialog to set task as done *********************************************************
-    bot.dialog(intents.FinishTask, [
+
+    //dialog to set task as done *********************************************************
+    bot.dialog(intentsConstants.FinishTask, [
         async (session) => {
             let todosResponse = [];
             let textMessage;
             let userId = session.message.user.id;
             const setOpts = {
                 userId: session.message.user.id,
-                lastUserIntent: intents.FinishTask
+                lastUserIntent: intentsConstants.FinishTask
             };
 
             setUserContextInfo(setOpts);
@@ -274,16 +311,14 @@ function botCreate(connector) {
 
             session.endDialog();
         }
-    ]).triggerAction({
-        matches: intents.FinishTask
-    });
+    ]);
 
     //Dialog to remove task **********************************************************
-    bot.dialog(intents.RemoveTask, [
+    bot.dialog(intentsConstants.RemoveTask, [
         async (session) => {
             const setOpts = {
                 userId: session.message.user.id,
-                lastUserIntent: intents.RemoveTask
+                lastUserIntent: intentsConstants.RemoveTask
             };
 
             setUserContextInfo(setOpts);
@@ -345,12 +380,10 @@ function botCreate(connector) {
 
             session.endDialog();
         }
-    ]).triggerAction({
-        matches: intents.RemoveTask
-    });
+    ]);
 
     //dialog to cancel conversation **************************************************
-    bot.dialog(intents.cancelConversation, (session) => {
+    bot.dialog(intentsConstants.cancelConversation, (session) => {
 
 
             session.endConversation(messages.cancelConversation);
@@ -361,19 +394,16 @@ function botCreate(connector) {
                 callback: ()=>{
                     const setOpts = {
                         userId: session.message.user.id,
-                        lastUserIntent: intents.cancelConversation
+                        lastUserIntent: intentsConstants.cancelConversation
                     };
 
                     setUserContextInfo(setOpts);
                 }
             });
-        }
-    ).triggerAction({
-            matches: intents.cancelConversation
         });
 
     //dialog to turn on radio **************************************************
-    bot.dialog(intents.radioOn, (session) => {
+    bot.dialog(intentsConstants.radioOn, (session) => {
 
             axios.get(radioOnLambdaUrl)
                 .then(function (response) {
@@ -385,7 +415,7 @@ function botCreate(connector) {
                         callback: ()=> {
                             const setOpts = {
                                 userId: session.message.user.id,
-                                lastUserIntent: intents.radioOn
+                                lastUserIntent: intentsConstants.radioOn
                             };
 
                             setUserContextInfo(setOpts);
@@ -397,12 +427,9 @@ function botCreate(connector) {
                     session.endConversation(messages.failedRadioOn);
                     botSayInFestival({message: messages.failedRadioOn, expectingInput: false, session: session});
                 });
-        }
-    ).triggerAction({
-            matches: intents.radioOn
         });
 
-    bot.dialog(intents.removeAllTasks, [
+    bot.dialog(intentsConstants.removeAllTasks, [
             (session) => {
                 botSayInFestival({
                     message: messages.sureToRemoveAll,
@@ -411,7 +438,7 @@ function botCreate(connector) {
                     callback: ()=> {
                         const setOpts = {
                             userId: session.message.user.id,
-                            lastUserIntent: intents.removeAllTasks
+                            lastUserIntent: intentsConstants.removeAllTasks
                         };
                         setUserContextInfo(setOpts);
                     }
@@ -451,13 +478,10 @@ function botCreate(connector) {
                     });
                 }
             }
-        ]
-    ).triggerAction({
-            matches: intents.removeAllTasks
-        });
+        ]);
 
     //dialog show what bot can do **************************************************
-    bot.dialog(intents.whatCanBotDo, (session) => {
+    bot.dialog(intentsConstants.whatCanBotDo, (session) => {
             botSayInFestival({
                 message: messages.botCanDoNextStuff,
                 expectingInput: true,
@@ -465,7 +489,7 @@ function botCreate(connector) {
                 callback: () => {
                     const setOpts = {
                         userId: session.message.user.id,
-                        lastUserIntent: intents.whatCanBotDo
+                        lastUserIntent: intentsConstants.whatCanBotDo
                     };
 
                     session.send(messages.botCanDoNextStuff);
@@ -473,13 +497,11 @@ function botCreate(connector) {
                     setUserContextInfo(setOpts);
                 }
             });
-        }
-    ).triggerAction({
-            matches: intents.whatCanBotDo
         });
 
+
     //dialog response for thank you **************************************************
-    bot.dialog(intents.appreciation, (session) => {
+    bot.dialog(intentsConstants.appreciation, (session) => {
             botSayInFestival({
                 message: messages.appreciationResponse,
                 expectingInput: true,
@@ -487,7 +509,7 @@ function botCreate(connector) {
                 callback: () => {
                     const setOpts = {
                         userId: session.message.user.id,
-                        lastUserIntent: intents.appreciation
+                        lastUserIntent: intentsConstants.appreciation
                     };
 
                     session.send(messages.appreciationResponse);
@@ -495,33 +517,11 @@ function botCreate(connector) {
                     setUserContextInfo(setOpts);
                 }
             });
-        }
-    ).triggerAction({
-            matches: intents.appreciation
         });
 
     //dialog response for farewell **************************************************
-    bot.dialog(intents.farewell, async (session) => {
-            let botReplyMessage = '';
-            let userContext = await getUserContextInfo(session.message.user.id);
-            const opts = {
-                type:intents.farewell,
-                context: userContext
-            };
-
-            let analysisResult  = await analyseUserContext(opts);
-
-            //todo: move to separate method --------------------------------->
-            switch (analysisResult.data) {
-                case generalConstants.userAnalysisResult.proceed:
-                    botReplyMessage = 'bye';
-                    break;
-                case generalConstants.userAnalysisResult.askedAlready:
-                    botReplyMessage = 'well, bye again';
-                    break;
-                default :
-                    botReplyMessage = 'bye';
-            }
+    bot.dialog(intentsConstants.farewell, (session) => {
+            let botReplyMessage = 'Bye';
 
             botSayInFestival({
                 message: botReplyMessage,
@@ -530,7 +530,7 @@ function botCreate(connector) {
                 callback: () => {
                     const setOpts = {
                         userId: session.message.user.id,
-                        lastUserIntent: intents.farewell
+                        lastUserIntent: intentsConstants.farewell
                     };
 
                     session.send(botReplyMessage);
@@ -539,9 +539,6 @@ function botCreate(connector) {
                     setUserContextInfo(setOpts);
                 }
             });
-        }
-    ).triggerAction({
-            matches: intents.farewell
         });
 
     /**********************************************************************

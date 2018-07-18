@@ -1,7 +1,6 @@
 let keyMirror = require('keymirror');
 
-const intents = {
-    'askForTaskName': null,
+const intentsConstants = {
     'AddTask': null,
     'GetTasks': null,
     'Greeting': null,
@@ -16,4 +15,4 @@ const intents = {
     'farewell': null
 };
 
-export default keyMirror(intents);
+export default keyMirror(intentsConstants);
