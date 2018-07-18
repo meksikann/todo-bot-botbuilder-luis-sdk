@@ -509,10 +509,9 @@ function botCreate(connector) {
                 context: userContext
             };
 
-            //TODO: MAKE A USER CONTEXT ANALYZER: use user context in dialogs ================================
             let analysisResult  = await analyseUserContext(opts);
 
-            //todo: move to separate method
+            //todo: move to separate method --------------------------------->
             switch (analysisResult.data) {
                 case generalConstants.userAnalysisResult.proceed:
                     botReplyMessage = 'bye';
