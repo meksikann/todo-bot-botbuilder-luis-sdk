@@ -1,5 +1,10 @@
 global.builder = require('botbuilder');
 require('dotenv').config();
+
+const { fork } = require('child_process');
+
+const analyseUserContextWorker = fork('./brain-nodes/index');
+
 const axios = require('axios');
 
 import {getFormatedTodos, getNumberedTodos} from './helpers/format-messages';
@@ -9,10 +14,9 @@ import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllT
 import {messages} from './constants/messages';
 import intentsConstants from './constants/intents';
 import {entities} from './constants/entities';
-import generalConstants from './constants/general';
 
 // brain import ****************
-import {analyseUserContext} from './brain-nodes/index';
+//import {analyseUserContext} from './brain-nodes/index';
 
 
 const radioOnLambdaUrl = process.env.LAMBDA_RADIO_ON;
@@ -23,21 +27,29 @@ function botCreate(connector) {
     let bot = new builder.UniversalBot(connector).set('storage', inMemoryStorage);
 
 
+    //context analyzer worker
+    analyseUserContextWorker.on('message', (msg) => {
+        console.log('got message from getUserContextInfoWorker: ', msg);
+    });
+
+
     /**********************************************************************
      * recognizer
      * ********************************************************************/
     let recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL)
 
-    .onFilter((context, result, callback) => {
-        console.log('context: ', context);
-        console.log('result: ', result);
-        //let userContext = await getUserContextInfo(session.message.user.id);
+    .onFilter(async (context, result, callback) => {
+        let userContext = await getUserContextInfo(context.message.user.id);
+
+        //send message to context analyzer worker
+        analyseUserContextWorker.send(userContext);
+
         //const opts = {
         //    type:intents.farewell,
         //    context: userContext
         //};
         //
-        //let analysisResult  = await analyseUserContext(opts);
+        //let analysisResult  = await analyseUserContextWorker(opts);
         //
         ////todo: move to separate method --------------------------------->
         //switch (analysisResult.data) {
