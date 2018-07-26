@@ -12,7 +12,8 @@ const intentsConstants = {
     'removeAllTasks': null,
     'whatCanBotDo':null,
     'appreciation': null,
-    'farewell': null
+    'farewell': null,
+    'oneTimeMessage': null
 };
 
 export default keyMirror(intentsConstants);

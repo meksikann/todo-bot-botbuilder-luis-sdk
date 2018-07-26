@@ -1,10 +1,5 @@
 global.builder = require('botbuilder');
 require('dotenv').config();
-
-const { fork } = require('child_process');
-
-const analyseUserContextWorker = fork('./brain-nodes/index');
-
 const axios = require('axios');
 
 import {getFormatedTodos, getNumberedTodos} from './helpers/format-messages';
@@ -14,9 +9,10 @@ import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllT
 import {messages} from './constants/messages';
 import intentsConstants from './constants/intents';
 import {entities} from './constants/entities';
+import generalConstants from './constants/general';
 
 // brain import ****************
-//import {analyseUserContext} from './brain-nodes/index';
+import {analyseUserContext} from './brain-nodes/index';
 
 
 const radioOnLambdaUrl = process.env.LAMBDA_RADIO_ON;
@@ -26,47 +22,56 @@ function botCreate(connector) {
 
     let bot = new builder.UniversalBot(connector).set('storage', inMemoryStorage);
 
+    /**********************************************************************
+     * middleware
+     * ********************************************************************/
 
-    //context analyzer worker
-    analyseUserContextWorker.on('message', (msg) => {
-        console.log('got message from getUserContextInfoWorker: ', msg);
+    bot.use({
+       botbuilder: (session, next) => {
+           builder.LuisRecognizer.recognize(session.message.text, process.env.LUIS_MODEL_URL, function (err, intents, entities) {
+
+               if(err) {
+                   return console.error(err);
+               }
+
+               console.log('MIDDLEWARE RECOGNIZE HANDLER ------------------------------------------------------>');
+               console.log(intents);
+               //TODO: make recognizer handler here and context hndler
+
+               //session.beginDialog(intentsConstants.Greeting);
+             next();
+           });
+       }
     });
 
 
     /**********************************************************************
      * recognizer
      * ********************************************************************/
-    let recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL)
-
-    .onFilter(async (context, result, callback) => {
-        let userContext = await getUserContextInfo(context.message.user.id);
-
-        //send message to context analyzer worker
-        analyseUserContextWorker.send(userContext);
-
-        //const opts = {
-        //    type:intents.farewell,
-        //    context: userContext
-        //};
-        //
-        //let analysisResult  = await analyseUserContextWorker(opts);
-        //
-        ////todo: move to separate method --------------------------------->
-        //switch (analysisResult.data) {
-        //    case generalConstants.userAnalysisResult.proceed:
-        //        botReplyMessage = 'bye';
-        //        break;
-        //    case generalConstants.userAnalysisResult.askedAlready:
-        //        botReplyMessage = 'well, bye again';
-        //        break;
-        //    default :
-        //        botReplyMessage = 'bye';
-        //}
-        callback(null, result);
-    });
+     let recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL);
     //
-    //bot.recognizer(recognizer);
-
+    // .onFilter( async (context, result, callback) => {
+    //     let analysisResult;
+    //
+    //     console.log(result);
+    //
+    //     const userContext = await getUserContextInfo(context.message.user.id);
+    //     const opts = {
+    //        type: result.intent,
+    //        context: userContext
+    //     };
+    //
+    //     try {
+    //         analysisResult  = await analyseUserContext(opts);
+    //         callback(null, analysisResult);
+    //     } catch(err) {
+    //         console.error('Error in user context analysis: ',err);
+    //         callback(err, {});
+    //     }
+    // });
+    // //
+    // //bot.recognizer(recognizer);
+    //
     let intents = new builder.IntentDialog({intentThreshold: 0.8, recognizers:[recognizer]});
 
     bot.dialog('/', intents);
@@ -84,6 +89,8 @@ function botCreate(connector) {
     intents.matches(intentsConstants.whatCanBotDo, intentsConstants.whatCanBotDo);
     intents.matches(intentsConstants.appreciation, intentsConstants.appreciation);
     intents.matches(intentsConstants.farewell, intentsConstants.farewell);
+    //trigger dialog with custom one-time message in it
+    intents.matches(intentsConstants.oneTimeMessage, intentsConstants.oneTimeMessage);
 
     //if no intent recognized use default message
     intents.onDefault((session, args)=>{
@@ -109,7 +116,6 @@ function botCreate(connector) {
     //greeting dialog ****************************************************
     bot.dialog(intentsConstants.Greeting, [
         (session, args, next) => {
-            console.log('greet', session.message.user.id)
             const setOpts = {
                 userId: session.message.user.id,
                 lastUserIntent: intentsConstants.Greeting
@@ -552,6 +558,19 @@ function botCreate(connector) {
                 }
             });
         });
+
+    //None intent dialog **************************************************
+    bot.dialog(intentsConstants.oneTimeMessage, function (session, results) {
+        const message = '';
+
+        console.log('results:==============================', results);
+
+        botSayInFestival({message: "I don't follow you! What you say?", expectingInput: true, session: session,
+        callback: () => {
+            session.send(message);
+            session.endDialog();
+        }});
+    });
 
     /**********************************************************************
      * ******************** end dialogs ***************************************
