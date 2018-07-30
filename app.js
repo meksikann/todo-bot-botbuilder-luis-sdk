@@ -11,7 +11,7 @@ let server = restify.createServer();
 
 //setup server
 server.listen(3978, () => {
-    console.log(`${server.name} ${messages.serverResponseMessages.listening} ${server.url}`);
+    console.log(`TODO-bot ${messages.serverResponseMessages.listening} ${server.url}`);
 });
 
 //create chat connector appId and appPassword are not needed when test on local bot-framework emulator

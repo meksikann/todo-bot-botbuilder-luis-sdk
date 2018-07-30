@@ -3,6 +3,7 @@ require('dotenv').config();
 const axios = require('axios');
 
 import {getFormatedTodos, getNumberedTodos} from './helpers/format-messages';
+import {getTopIntent} from "./helpers/recognize-helper";
 import {botSayInFestival} from './helpers/tts-synthesis';
 import {getUserContextInfo, setUserContextInfo} from './helpers/userContext';
 import {addTask, markAsDone, removeTask, getActiveTasks, getAllTasks, removeAllTasks} from './helpers/database-queries';
@@ -27,76 +28,83 @@ function botCreate(connector) {
      * ********************************************************************/
 
     bot.use({
-       botbuilder: (session, next) => {
-           builder.LuisRecognizer.recognize(session.message.text, process.env.LUIS_MODEL_URL, function (err, intents, entities) {
+        botbuilder: (session, next) => {
+            builder.LuisRecognizer.recognize(session.message.text, process.env.LUIS_MODEL_URL,
+                async (err, intents, entities) => {
+                    if (err) {
+                        return console.error(err);
+                    }
 
-               if(err) {
-                   return console.error(err);
-               }
+                    console.log('MIDDLEWARE RECOGNIZE HANDLER !------------------------------------------------------>');
+                    console.log(intents);
 
-               console.log('MIDDLEWARE RECOGNIZE HANDLER ------------------------------------------------------>');
-               console.log(intents);
-               //TODO: make recognizer handler here and context hndler
+                    const topScore = 0.8;
+                    const incomeMessage = session.message.text;
+                    const userId = session.message.user.id;
 
-               //session.beginDialog(intentsConstants.Greeting);
-             next();
-           });
-       }
+                    // get top intent deppending from top score
+                    //todo!!!!!!!!!!
+                    const topIntent = getTopIntent(intents, topScore);
+
+                    // get user talk context from db
+                    const userContext = await getUserContextInfo(userId);
+
+
+                    //TODO: make recognizer handler here and context handler
+
+
+
+
+                    //     const opts = {
+                    //        type: result.intent,
+                    //        context: userContext
+                    //     };
+                    //
+                    //     try {
+                    //         analysisResult  = await analyseUserContext(opts);
+                    //         callback(null, analysisResult);
+                    //     } catch(err) {
+                    //         console.error('Error in user context analysis: ',err);
+                    //         callback(err, {});
+                    //     }
+
+                    //session.beginDialog(intentsConstants.Greeting);
+                    next();
+                });
+        }
     });
 
 
     /**********************************************************************
      * recognizer
      * ********************************************************************/
-     let recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL);
+    // let recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL);
     //
-    // .onFilter( async (context, result, callback) => {
-    //     let analysisResult;
+    // let intents = new builder.IntentDialog({intentThreshold: 0.8, recognizers: [recognizer]});
     //
-    //     console.log(result);
+    // bot.dialog('/', intents);
     //
-    //     const userContext = await getUserContextInfo(context.message.user.id);
-    //     const opts = {
-    //        type: result.intent,
-    //        context: userContext
-    //     };
+    // //match intents with dialogs to trigger
     //
-    //     try {
-    //         analysisResult  = await analyseUserContext(opts);
-    //         callback(null, analysisResult);
-    //     } catch(err) {
-    //         console.error('Error in user context analysis: ',err);
-    //         callback(err, {});
-    //     }
+    // intents.matches(intentsConstants.Greeting, intentsConstants.Greeting);
+    // intents.matches(intentsConstants.AddTask, intentsConstants.AddTask);
+    // intents.matches(intentsConstants.GetTasks, intentsConstants.GetTasks);
+    // intents.matches(intentsConstants.FinishTask, intentsConstants.FinishTask);
+    // intents.matches(intentsConstants.RemoveTask, intentsConstants.RemoveTask);
+    // intents.matches(intentsConstants.cancelConversation, intentsConstants.cancelConversation);
+    // intents.matches(intentsConstants.radioOn, intentsConstants.radioOn);
+    // intents.matches(intentsConstants.removeAllTasks, intentsConstants.removeAllTasks);
+    // intents.matches(intentsConstants.whatCanBotDo, intentsConstants.whatCanBotDo);
+    // intents.matches(intentsConstants.appreciation, intentsConstants.appreciation);
+    // intents.matches(intentsConstants.farewell, intentsConstants.farewell);
+    // //trigger dialog with custom one-time message in it
+    // intents.matches(intentsConstants.oneTimeMessage, intentsConstants.oneTimeMessage);
+    //
+    // //if no intent recognized use default message
+    // intents.onDefault((session, args) => {
+    //     session.send('No intent recognized');
+    //     session.endDialog('Type some other utterance please');
     // });
-    // //
-    // //bot.recognizer(recognizer);
-    //
-    let intents = new builder.IntentDialog({intentThreshold: 0.8, recognizers:[recognizer]});
-
-    bot.dialog('/', intents);
-
-    //match intents with dialogs to trigger
-
-    intents.matches(intentsConstants.Greeting, intentsConstants.Greeting);
-    intents.matches(intentsConstants.AddTask, intentsConstants.AddTask);
-    intents.matches(intentsConstants.GetTasks, intentsConstants.GetTasks);
-    intents.matches(intentsConstants.FinishTask, intentsConstants.FinishTask);
-    intents.matches(intentsConstants.RemoveTask, intentsConstants.RemoveTask);
-    intents.matches(intentsConstants.cancelConversation, intentsConstants.cancelConversation);
-    intents.matches(intentsConstants.radioOn, intentsConstants.radioOn);
-    intents.matches(intentsConstants.removeAllTasks, intentsConstants.removeAllTasks);
-    intents.matches(intentsConstants.whatCanBotDo, intentsConstants.whatCanBotDo);
-    intents.matches(intentsConstants.appreciation, intentsConstants.appreciation);
-    intents.matches(intentsConstants.farewell, intentsConstants.farewell);
-    //trigger dialog with custom one-time message in it
-    intents.matches(intentsConstants.oneTimeMessage, intentsConstants.oneTimeMessage);
-
-    //if no intent recognized use default message
-    intents.onDefault((session, args)=>{
-        session.send('No intent recognized');
-        session.endDialog('Type some other utterance please');
-    });
 
     /**********************************************************************
      * dialogs
@@ -163,7 +171,7 @@ function botCreate(connector) {
                         message: 'please provide a task name',
                         expectingInput: true,
                         session: session,
-                        callback: ()=> {
+                        callback: () => {
                             builder.Prompts.text(session, messages.getWhatNewTaskName());
                         }
                     });
@@ -174,7 +182,7 @@ function botCreate(connector) {
                     message: 'please provide a task name',
                     expectingInput: true,
                     session: session,
-                    callback: ()=> {
+                    callback: () => {
                         builder.Prompts.text(session, messages.getWhatNewTaskName());
                     }
                 });
@@ -211,7 +219,7 @@ function botCreate(connector) {
             } else {
                 session.send(messages.getNoProblem());
                 botSayInFestival({
-                    message: messages.getNoProblem(), expectingInput: true, session: session, callback: ()=> {
+                    message: messages.getNoProblem(), expectingInput: true, session: session, callback: () => {
                         session.endDialog();
                     }
                 });
@@ -404,172 +412,172 @@ function botCreate(connector) {
     bot.dialog(intentsConstants.cancelConversation, (session) => {
 
 
-            session.endConversation(messages.cancelConversation);
-            botSayInFestival({
-                message: messages.cancelConversation,
-                expectingInput: true,
-                session: session,
-                callback: ()=>{
-                    const setOpts = {
-                        userId: session.message.user.id,
-                        lastUserIntent: intentsConstants.cancelConversation
-                    };
+        session.endConversation(messages.cancelConversation);
+        botSayInFestival({
+            message: messages.cancelConversation,
+            expectingInput: true,
+            session: session,
+            callback: () => {
+                const setOpts = {
+                    userId: session.message.user.id,
+                    lastUserIntent: intentsConstants.cancelConversation
+                };
 
-                    setUserContextInfo(setOpts);
-                }
-            });
+                setUserContextInfo(setOpts);
+            }
         });
+    });
 
     //dialog to turn on radio **************************************************
     bot.dialog(intentsConstants.radioOn, (session) => {
 
-            axios.get(radioOnLambdaUrl)
-                .then(function (response) {
-                    session.endConversation(messages.radioOn);
-                    botSayInFestival({
-                        message: messages.radioOn,
-                        expectingInput: false,
-                        session: session,
-                        callback: ()=> {
-                            const setOpts = {
-                                userId: session.message.user.id,
-                                lastUserIntent: intentsConstants.radioOn
-                            };
-
-                            setUserContextInfo(setOpts);
-                        }
-                    });
-                })
-                .catch(function (error) {
-                    console.error(error);
-                    session.endConversation(messages.failedRadioOn);
-                    botSayInFestival({message: messages.failedRadioOn, expectingInput: false, session: session});
-                });
-        });
-
-    bot.dialog(intentsConstants.removeAllTasks, [
-            (session) => {
+        axios.get(radioOnLambdaUrl)
+            .then(function (response) {
+                session.endConversation(messages.radioOn);
                 botSayInFestival({
-                    message: messages.sureToRemoveAll,
-                    expectingInput: true,
+                    message: messages.radioOn,
+                    expectingInput: false,
                     session: session,
-                    callback: ()=> {
+                    callback: () => {
                         const setOpts = {
                             userId: session.message.user.id,
-                            lastUserIntent: intentsConstants.removeAllTasks
+                            lastUserIntent: intentsConstants.radioOn
                         };
+
                         setUserContextInfo(setOpts);
                     }
                 });
-                builder.Prompts.confirm(session, messages.sureToRemoveAll);
-            },
-            async (session, results) => {
-                if (results.response) {
-                    let userId = session.message.user.id;
+            })
+            .catch(function (error) {
+                console.error(error);
+                session.endConversation(messages.failedRadioOn);
+                botSayInFestival({message: messages.failedRadioOn, expectingInput: false, session: session});
+            });
+    });
 
-                    try {
-                        let result = await removeAllTasks(userId);
-
-                        session.send(messages.allTasksRemoved);
-                        botSayInFestival({
-                            message: messages.allTasksRemoved, expectingInput: true, session: session, callback: ()=> {
-                                session.endDialog();
-                            }
-                        });
-
-                    } catch (err) {
-                        console.error(err);
-                        botSayInFestival({
-                            message: messages.shitSomethingWrong,
-                            expectingInput: true,
-                            session: session
-                        });
-                        session.send(messages.shitSomethingWrong);
-                    }
-
-                } else {
-                    session.send(messages.getNoProblem());
-                    botSayInFestival({
-                        message: messages.getNoProblem(), expectingInput: true, session: session, callback: ()=> {
-                            session.endDialog();
-                        }
-                    });
-                }
-            }
-        ]);
-
-    //dialog show what bot can do **************************************************
-    bot.dialog(intentsConstants.whatCanBotDo, (session) => {
+    bot.dialog(intentsConstants.removeAllTasks, [
+        (session) => {
             botSayInFestival({
-                message: messages.botCanDoNextStuff,
+                message: messages.sureToRemoveAll,
                 expectingInput: true,
                 session: session,
                 callback: () => {
                     const setOpts = {
                         userId: session.message.user.id,
-                        lastUserIntent: intentsConstants.whatCanBotDo
+                        lastUserIntent: intentsConstants.removeAllTasks
                     };
-
-                    session.send(messages.botCanDoNextStuff);
-                    session.endDialog();
                     setUserContextInfo(setOpts);
                 }
             });
+            builder.Prompts.confirm(session, messages.sureToRemoveAll);
+        },
+        async (session, results) => {
+            if (results.response) {
+                let userId = session.message.user.id;
+
+                try {
+                    let result = await removeAllTasks(userId);
+
+                    session.send(messages.allTasksRemoved);
+                    botSayInFestival({
+                        message: messages.allTasksRemoved, expectingInput: true, session: session, callback: () => {
+                            session.endDialog();
+                        }
+                    });
+
+                } catch (err) {
+                    console.error(err);
+                    botSayInFestival({
+                        message: messages.shitSomethingWrong,
+                        expectingInput: true,
+                        session: session
+                    });
+                    session.send(messages.shitSomethingWrong);
+                }
+
+            } else {
+                session.send(messages.getNoProblem());
+                botSayInFestival({
+                    message: messages.getNoProblem(), expectingInput: true, session: session, callback: () => {
+                        session.endDialog();
+                    }
+                });
+            }
+        }
+    ]);
+
+    //dialog show what bot can do **************************************************
+    bot.dialog(intentsConstants.whatCanBotDo, (session) => {
+        botSayInFestival({
+            message: messages.botCanDoNextStuff,
+            expectingInput: true,
+            session: session,
+            callback: () => {
+                const setOpts = {
+                    userId: session.message.user.id,
+                    lastUserIntent: intentsConstants.whatCanBotDo
+                };
+
+                session.send(messages.botCanDoNextStuff);
+                session.endDialog();
+                setUserContextInfo(setOpts);
+            }
         });
+    });
 
 
     //dialog response for thank you **************************************************
     bot.dialog(intentsConstants.appreciation, (session) => {
-            botSayInFestival({
-                message: messages.appreciationResponse,
-                expectingInput: true,
-                session: session,
-                callback: () => {
-                    const setOpts = {
-                        userId: session.message.user.id,
-                        lastUserIntent: intentsConstants.appreciation
-                    };
+        botSayInFestival({
+            message: messages.appreciationResponse,
+            expectingInput: true,
+            session: session,
+            callback: () => {
+                const setOpts = {
+                    userId: session.message.user.id,
+                    lastUserIntent: intentsConstants.appreciation
+                };
 
-                    session.send(messages.appreciationResponse);
-                    session.endDialog();
-                    setUserContextInfo(setOpts);
-                }
-            });
+                session.send(messages.appreciationResponse);
+                session.endDialog();
+                setUserContextInfo(setOpts);
+            }
         });
+    });
 
     //dialog response for farewell **************************************************
     bot.dialog(intentsConstants.farewell, (session) => {
-            let botReplyMessage = 'Bye';
+        let botReplyMessage = 'Bye';
 
-            botSayInFestival({
-                message: botReplyMessage,
-                expectingInput: false,
-                session: session,
-                callback: () => {
-                    const setOpts = {
-                        userId: session.message.user.id,
-                        lastUserIntent: intentsConstants.farewell
-                    };
+        botSayInFestival({
+            message: botReplyMessage,
+            expectingInput: false,
+            session: session,
+            callback: () => {
+                const setOpts = {
+                    userId: session.message.user.id,
+                    lastUserIntent: intentsConstants.farewell
+                };
 
-                    session.send(botReplyMessage);
-                    session.endDialog();
-                    //save use context
-                    setUserContextInfo(setOpts);
-                }
-            });
+                session.send(botReplyMessage);
+                session.endDialog();
+                //save use context
+                setUserContextInfo(setOpts);
+            }
         });
+    });
 
     //None intent dialog **************************************************
     bot.dialog(intentsConstants.oneTimeMessage, function (session, results) {
         const message = '';
 
-        console.log('results:==============================', results);
-
-        botSayInFestival({message: "I don't follow you! What you say?", expectingInput: true, session: session,
-        callback: () => {
-            session.send(message);
-            session.endDialog();
-        }});
+        botSayInFestival({
+            message: "I don't follow you! What you say?", expectingInput: true, session: session,
+            callback: () => {
+                session.send(message);
+                session.endDialog();
+            }
+        });
     });
 
     /**********************************************************************
