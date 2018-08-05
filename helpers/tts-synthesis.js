@@ -15,7 +15,7 @@ function botSayInFestival(opts) {
     // use speech synthesis if enabled ********************************
     if(process.env.ENABLE_SPEECH == 1) {
         if (opts.callback) {
-            say.speak(message, voices[1], null, (err) => {
+            say.speak(message, null, null, (err) => {
                 if (err) {
                     return console.log(err);
                 }

@@ -40,11 +40,14 @@ function botCreate(connector) {
     bot.dialog(intents.None, function (session) {
         const userName = session.userData.userName;
 
-        botSayInFestival({message: "I don't follow you! What you say?", expectingInput: true, session: session});
+        botSayInFestival({message: "I don't follow you! What you say?", expectingInput: false, session: session,
+        callback:() => {
 
-        session.send(
-            messages.getDontUnderstanYou(userName));
-        session.endDialog();
+            session.send(
+                messages.getDontUnderstanYou(userName));
+            session.endDialog();
+        }});
+
     })
         .triggerAction({
             matches: intents.None
@@ -59,30 +62,32 @@ function botCreate(connector) {
                 lastUserIntent: intents.Greeting
             };
 
-            setUserContextInfo(setOpts);
-
-            session.userData.userName ? next() : botSayInFestival({
-                message: messages.askName,
-                expectingInput: true,
-                session: session,
-                callback: () => {
-                    builder.Prompts.text(session, messages.askName);
-                }
-            });
+            next()
+            //
+            // setUserContextInfo(setOpts);
+            //
+            // session.userData.userName ? next() : botSayInFestival({
+            //     message: messages.askName,
+            //     expectingInput: true,
+            //     session: session,
+            //     callback: () => {
+            //         builder.Prompts.text(session, messages.askName);
+            //     }
+            // });
         },
         (session, results) => {
-            const userName = results.response ? (session.userData.userName = results.response, results.response) : session.userData.userName;
-
+            const userName = 'Serhiy';
             botSayInFestival({
-                message: `Hey how can I help you, ${userName}?`,
-                expectingInput: true,
+                message: `Hey how can I help you?`,
+                expectingInput: false,
                 session: session,
                 callback: () => {
                     session.send(
                         messages.getBotGreetingMessage(userName));
-                    session.endDialog();
+
                 }
             });
+            session.endDialog();
         }])
         .triggerAction({
             matches: intents.Greeting
@@ -102,23 +107,25 @@ function botCreate(connector) {
                 } else {
                     botSayInFestival({
                         message: 'please provide a task name',
-                        expectingInput: true,
+                        expectingInput: false,
                         session: session,
                         callback: ()=> {
                             builder.Prompts.text(session, messages.getWhatNewTaskName());
                         }
                     });
 
+
                 }
             } else {
                 botSayInFestival({
                     message: 'please provide a task name',
-                    expectingInput: true,
+                    expectingInput: false,
                     session: session,
                     callback: ()=> {
                         builder.Prompts.text(session, messages.getWhatNewTaskName());
                     }
                 });
+
             }
         },
         async (session, results, next) => {
@@ -131,8 +138,11 @@ function botCreate(connector) {
 
             try {
                 const result = await addTask(todo);
-                session.send(messages.getSavedTask(results.response));
-                botSayInFestival({message: 'task saved', callback: next});
+
+                botSayInFestival({message: 'task saved', callback: ()=>{
+                        session.send(messages.getSavedTask(results.response));
+                        next();
+                    }});
             } catch (e) {
                 console.error(e);
                 botSayInFestival({message: 'Failed to save task'});
@@ -143,8 +153,12 @@ function botCreate(connector) {
         },
         (session) => {
             const userName = session.userData.userName;
-            botSayInFestival({message: 'Wanna add more tasks?', expectingInput: true, session: session});
+            botSayInFestival({message: 'Wanna add more tasks?', expectingInput: false, session: session,
+            callback: ()=> {
+
+            }});
             builder.Prompts.confirm(session, messages.getWantAddMore(userName));
+
         },
         (session, results) => {
             if (results.response) {
@@ -152,7 +166,7 @@ function botCreate(connector) {
             } else {
                 session.send(messages.getNoProblem());
                 botSayInFestival({
-                    message: messages.getNoProblem(), expectingInput: true, session: session, callback: ()=> {
+                    message: messages.getNoProblem(), expectingInput: false, session: session, callback: ()=> {
                         session.endDialog();
                     }
                 });
@@ -183,24 +197,30 @@ function botCreate(connector) {
                 if (todos && todos.length) {
                     todosResponse = getFormatedTodos(todos);
                     textMessage = `Here are your task(s), ${userName}:<br/> ${todosResponse}<br/><br/>${messages.getWantDoTaskActions()}`
-                    voiceMessage = `Here are your tasks , you have ${todos.length} items`;
+                    voiceMessage = `Here are your tasks`;
                 } else {
                     textMessage = messages.getYouDontHaveTasks();
-                    voiceMessage = 'There are no tasks in database';
+                    voiceMessage = 'There are no tasks.';
                 }
 
-                //write items list
-                session.send(textMessage);
 
-                botSayInFestival({message: voiceMessage, expectingInput: true, session: session});
+                botSayInFestival({message: voiceMessage, expectingInput: false, session: session, callback: () => {
+
+                    //write items list
+                    session.send(textMessage);
+                        session.endDialog();
+                }});
 
             } catch (e) {
                 console.error(e);
-                botSayInFestival({message: messages.getCannotGetItems(), expectingInput: true, session: session});
-                session.send(messages.getCannotGetItems());
+                botSayInFestival({message: messages.getCannotGetItems(), expectingInput: false, session: session,
+                callback: ()=>{
+                    session.send(messages.getCannotGetItems());
+                    session.endDialog();
+                }});
             }
 
-            session.endDialog();
+
         }
     ]).triggerAction({
         matches: intents.GetTasks
@@ -227,8 +247,8 @@ function botCreate(connector) {
 
                     todosResponse = getNumberedTodos(todos);
                     botSayInFestival({
-                        message: `Please choose an task number to mark as done and press 'Enter'`,
-                        expectingInput: true,
+                        message: `Please choose an task number`,
+                        expectingInput: false,
                         session: session
                     });
                     textMessage = `Please choose an task number to mark as done and press 'Enter'<br/>${todosResponse}`
@@ -239,7 +259,7 @@ function botCreate(connector) {
                 builder.Prompts.number(session, textMessage);
             } catch (err) {
                 console.error(err);
-                botSayInFestival({message: messages.getCannotGetItems(), expectingInput: true, session: session});
+                botSayInFestival({message: messages.getCannotGetItems(), expectingInput: false, session: session});
                 session.send(messages.getCannotGetItems());
             }
         },
@@ -257,18 +277,18 @@ function botCreate(connector) {
                     let todos = await markAsDone(taskId);
                     botSayInFestival({
                         message: 'Super. Task has been marked as done',
-                        expectingInput: true,
+                        expectingInput: false,
                         session: session
                     });
                     session.send(messages.getMarkedTaskDone(userName, taskName));
 
                 } catch (err) {
                     console.error((err));
-                    botSayInFestival({message: messages.noItemFound, expectingInput: true, session: session});
+                    botSayInFestival({message: messages.noItemFound, expectingInput: false, session: session});
                     session.send(messages.noItemFound);
                 }
             } else {
-                botSayInFestival({message: messages.noItemFound, expectingInput: true, session: session});
+                botSayInFestival({message: messages.noItemFound, expectingInput: false, session: session});
                 session.send(messages.noItemFound);
             }
 
@@ -299,8 +319,8 @@ function botCreate(connector) {
 
                     todosResponse = getNumberedTodos(todos);
                     botSayInFestival({
-                        message: `Please choose an task number to remove.'`,
-                        expectingInput: true,
+                        message: `Please choose an task number'`,
+                        expectingInput: false,
                         session: session
                     });
                     textMessage = `Please choose an task number to remove and press 'Enter'<br/>${todosResponse}`
@@ -312,7 +332,7 @@ function botCreate(connector) {
 
             } catch (err) {
                 console.error(err);
-                botSayInFestival({message: messages.getCannotGetItems(), expectingInput: true, session: session});
+                botSayInFestival({message: messages.getCannotGetItems(), expectingInput: false, session: session});
                 session.send(messages.getCannotGetItems());
             }
         },
@@ -330,16 +350,16 @@ function botCreate(connector) {
                     let todos = await removeTask(taskId);
                     //const result = await db.collection('todos').update({'_id': mongojs.ObjectId(taskId)},{$set:{'isDone':true}});
 
-                    botSayInFestival({message: 'Super. Task has been removed', expectingInput: true, session: session});
+                    botSayInFestival({message: 'Super. Task has been removed', expectingInput: false, session: session});
                     session.send(messages.getRemovedTask(userName, taskName));
                 } catch (err) {
                     console.error((err));
-                    botSayInFestival({message: messages.noItemFound, expectingInput: true, session: session});
+                    botSayInFestival({message: messages.noItemFound, expectingInput: false, session: session});
                     session.send(messages.noItemFound);
 
                 }
             } else {
-                botSayInFestival({message: messages.noItemFound, expectingInput: true, session: session});
+                botSayInFestival({message: messages.noItemFound, expectingInput: false, session: session});
                 session.send(messages.noItemFound);
             }
 
@@ -356,7 +376,7 @@ function botCreate(connector) {
             session.endConversation(messages.cancelConversation);
             botSayInFestival({
                 message: messages.cancelConversation,
-                expectingInput: true,
+                expectingInput: false,
                 session: session,
                 callback: ()=>{
                     const setOpts = {
@@ -406,7 +426,7 @@ function botCreate(connector) {
             (session) => {
                 botSayInFestival({
                     message: messages.sureToRemoveAll,
-                    expectingInput: true,
+                    expectingInput: false,
                     session: session,
                     callback: ()=> {
                         const setOpts = {
@@ -414,9 +434,11 @@ function botCreate(connector) {
                             lastUserIntent: intents.removeAllTasks
                         };
                         setUserContextInfo(setOpts);
+
                     }
                 });
                 builder.Prompts.confirm(session, messages.sureToRemoveAll);
+
             },
             async (session, results) => {
                 if (results.response) {
@@ -427,7 +449,7 @@ function botCreate(connector) {
 
                         session.send(messages.allTasksRemoved);
                         botSayInFestival({
-                            message: messages.allTasksRemoved, expectingInput: true, session: session, callback: ()=> {
+                            message: messages.allTasksRemoved, expectingInput: false, session: session, callback: ()=> {
                                 session.endDialog();
                             }
                         });
@@ -436,16 +458,17 @@ function botCreate(connector) {
                         console.error(err);
                         botSayInFestival({
                             message: messages.shitSomethingWrong,
-                            expectingInput: true,
+                            expectingInput: false,
                             session: session
                         });
                         session.send(messages.shitSomethingWrong);
                     }
 
                 } else {
-                    session.send(messages.getNoProblem());
+
                     botSayInFestival({
-                        message: messages.getNoProblem(), expectingInput: true, session: session, callback: ()=> {
+                        message: messages.getNoProblem(), expectingInput: false, session: session, callback: ()=> {
+                            session.send(messages.getNoProblem());
                             session.endDialog();
                         }
                     });
@@ -460,7 +483,7 @@ function botCreate(connector) {
     bot.dialog(intents.whatCanBotDo, (session) => {
             botSayInFestival({
                 message: messages.botCanDoNextStuff,
-                expectingInput: true,
+                expectingInput: false,
                 session: session,
                 callback: () => {
                     const setOpts = {
@@ -482,7 +505,7 @@ function botCreate(connector) {
     bot.dialog(intents.appreciation, (session) => {
             botSayInFestival({
                 message: messages.appreciationResponse,
-                expectingInput: true,
+                expectingInput: false,
                 session: session,
                 callback: () => {
                     const setOpts = {

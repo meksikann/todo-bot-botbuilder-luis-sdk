@@ -6,7 +6,7 @@ let messages = {
     * ****************************** get methods *******************************************
     * **************************************************************************************/
     getBotGreetingMessage: (userName) => {
-        return `Hi, ${userName}. How can I help you?`;
+        return `Hi, ${userName || ''}. How can I help you?`;
     },
     getWhatNewTaskName: () => {
         return 'What is new task name?'
@@ -31,7 +31,7 @@ let messages = {
         return `Ups!! Cannot get items`;
     },
     getDontUnderstanYou: (username)=> {
-        return `I don't fallow you, ${username}. Please try to use other sentences.`;
+        return `I don't fallow you, ${username || ''}. Please try to use other sentences.`;
     },
     getWantDoTaskActions: ()=> {
         return 'Do you want to do some actions with tasks?<br/>' +
@@ -41,10 +41,10 @@ let messages = {
         return 'What task have you finished? please pick a number...';
     },
     getMarkedTaskDone: (userName, taskName) => {
-        return `Great, ${userName}! I've marked "${taskName}" as done."`
+        return `Great, ${userName || ''}! I've marked "${taskName || ''}" as done."`
     },
     getRemovedTask: (userName, taskName) => {
-        return `Great, ${userName}! I've removed "${taskName}" .`
+        return `Great, ${userName || ''}! I've removed "${taskName || ''}" .`
     },
     /**************************************************************************
     ******************************* string constants **************************
@@ -53,8 +53,8 @@ let messages = {
     cancelConversation: "Ok  See you later",
     radioOn: 'Ok my friend, will turn on radio right now',
     failedRadioOn: 'Failed to turn on the radio.',
-    sureToRemoveAll: 'Are you really sure you want to remove all your tasks?',
-    allTasksRemoved: 'ok, I have just removed all  your tasks',
+    sureToRemoveAll: 'Are you really sure?',
+    allTasksRemoved: 'ok, I have removed all',
     shitSomethingWrong: 'Shit , something went wrong!',
     askName: 'Hi! What is your name?',
     botCanDoNextStuff: 'I can show your tasks, add few, remove or set as done.',
